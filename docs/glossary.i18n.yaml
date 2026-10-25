@@ -1,0 +1,11 @@
+# Bilingual-pair consistency record for docs/glossary.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-glossary-pair.sh --write docs/glossary.md
+/glossary:
+  en: 10235f720223d325
+  zh: 85b85e9ea8a8c680
+/glossary/language:
+  en: 226292fc2213ffde
+  zh: afbf34aac7673e2e

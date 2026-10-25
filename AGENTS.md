@@ -9,7 +9,7 @@ KOSMOS is a client-server tool for diagnosing anomalies on Linux virtual machine
 
 ## Language
 
-English: this file, ADRs, code comments, commit messages. Human-facing docs are bilingual pairs — `foo.md` (English) + `foo.zh.md` (Chinese); either side may be authored, sync the counterpart minimally in the same change.
+English: this file, ADRs, code comments, commit messages. Human-facing docs are bilingual pairs — `foo.md` (English) + `foo.zh.md` (Chinese); either side may be authored, sync the counterpart minimally in the same change. `docs/glossary.md` is such a pair, gated by `scripts/verify-glossary-pair.sh`: after editing either side, bring the other along and re-record the hash sidecar `docs/glossary.i18n.yaml`. Chinese prose uses full-width punctuation; inline code, URLs, and identifiers keep ASCII.
 
 ## Conventions
 
