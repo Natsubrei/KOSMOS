@@ -11,28 +11,36 @@ import (
 	"time"
 
 	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
-	"github.com/natsubrei/kosmos/internal/agent/bus"
 	cpudomain "github.com/natsubrei/kosmos/internal/agent/domain/cpu"
 	"github.com/natsubrei/kosmos/internal/agent/report"
 	"github.com/natsubrei/kosmos/internal/agent/runtime"
+	"github.com/natsubrei/kosmos/internal/agent/upload"
+	"github.com/natsubrei/kosmos/internal/bus"
 )
 
 func main() {
 	interval := flag.Duration("interval", time.Second, "collection tick interval")
+	server := flag.String("server", "", "KOSMOS server base URL; empty skips upload")
+	user := flag.String("user", "dev", "X-User-Id sent with uploads")
 	flag.Parse()
 
-	if err := run(*interval); err != nil {
+	if err := run(*interval, *server, *user); err != nil {
 		fmt.Fprintln(os.Stderr, "agent:", err)
 		os.Exit(1)
 	}
 }
 
-func run(interval time.Duration) error {
+func run(interval time.Duration, server, user string) error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
 	b := bus.New()
 	b.Subscribe(cpucontracts.Domain, report.NewJSONLines(os.Stdout))
+	if server != "" {
+		u := upload.New(server, user)
+		u.Start(ctx)
+		b.Subscribe(cpucontracts.Domain, u)
+	}
 
 	bundle, err := cpudomain.New(interval)
 	if err != nil {

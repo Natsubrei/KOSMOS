@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/natsubrei/kosmos/internal/agent/bus"
+	"github.com/natsubrei/kosmos/internal/bus"
 )
 
 // Collector is the domain-bundle seam: everything a collection domain plugs

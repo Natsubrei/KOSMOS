@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/natsubrei/kosmos/internal/agent/bus"
+	"github.com/natsubrei/kosmos/internal/bus"
 )
 
 func TestDeliverWritesOneJSONLine(t *testing.T) {

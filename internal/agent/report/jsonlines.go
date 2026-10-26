@@ -7,7 +7,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/natsubrei/kosmos/internal/agent/bus"
+	"github.com/natsubrei/kosmos/internal/bus"
 )
 
 // JSONLines writes one JSON object per record, in the order delivered.

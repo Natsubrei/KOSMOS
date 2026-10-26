@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/natsubrei/kosmos/internal/agent/bus"
+	"github.com/natsubrei/kosmos/internal/bus"
 )
 
 type fakeCollector struct {

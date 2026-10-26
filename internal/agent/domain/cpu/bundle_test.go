@@ -6,8 +6,8 @@ import (
 	"time"
 
 	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
-	"github.com/natsubrei/kosmos/internal/agent/bus"
 	"github.com/natsubrei/kosmos/internal/agent/runtime"
+	"github.com/natsubrei/kosmos/internal/bus"
 )
 
 func TestNewRejectsNonPositiveInterval(t *testing.T) {
