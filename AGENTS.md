@@ -23,4 +23,5 @@ English: this file, code comments, commit messages. Human-facing docs — the gl
 - Report only the commands actually run; never claim a check that was not executed.
 - Never bypass a failing check to make progress; fix the cause or stop and report.
 - Commit messages follow Conventional Commits — `type(scope): imperative subject` (feat, fix, docs, refactor, test, chore, build, ci, perf); a `!` after the type marks a breaking change with a `BREAKING CHANGE:` footer.
+- A commit's message and the prose it adds or edits must not refer to unstaged files. If the prose needs those paths, stage them in this commit or an earlier one, or do not commit.
 - Development proceeds in small, iterative steps: land each step working and green before starting the next; prefer the smallest change that moves the work forward.
