@@ -25,9 +25,9 @@ start and stop collecting for its domain.
 _Avoid_: driver, provider
 
 **Analyzer**:
-The server-side counterpart of a domain bundle: subscribes to that domain's records on
-the server bus and interprets them into findings and evidence.
-_Avoid_: rule engine, processor
+The server-side counterpart of a domain bundle: subscribes to that domain's Records on
+the server bus and produces Reports.
+_Avoid_: rule engine, processor, finding
 
 **Record bus**:
 The in-process typed-record pipeline. Each side has one (agent, server); both carry
@@ -55,7 +55,7 @@ _Avoid_: framework, context
 **Contracts**:
 Per-domain pure-type packages shared by agent and server (`contracts/<domain>`): record
 types and constants, zero implementation.
-_Avoid_: API, schema (those name the wire protocol, ticket 0006)
+_Avoid_: API, schema (those name the wire protocol)
 
 **Record**:
 One observation a bundle publishes: payload, domain, and wall-clock time stamped at
@@ -73,3 +73,42 @@ The domain-free part of each process: on the agent, the record bus and the runti
 kit; on the server, the shared ingest/window/report pipeline. Domains enter only by
 registration.
 _Avoid_: kernel, host
+
+## Diagnosis
+
+**Report**:
+The auditable document a human reads: one Conclusion, the Evidence it rests on, and
+the Window it covers. Immutable; a later run is a different Report.
+_Avoid_: finding, problem card, diagnosis result
+
+**Conclusion**:
+A typed claim about one Subject: a kind, the Subject, and a stance (holds, does
+not hold, or insufficient evidence). Prose is generated from these, not stored as
+the claim.
+_Avoid_: finding, verdict, root cause
+
+**Evidence**:
+One item a Conclusion rests on: an opaque kind, a payload, and a list of what it
+rests on (a Record snapshot, a Window, another Evidence in the same Report, or a
+Gap).
+_Avoid_: citation, attachment, justification
+
+**Subject**:
+The typed identity a Conclusion is about: host, pid, tid, and the task start time
+(so PID reuse does not alias). A process-level claim leaves tid empty. comm and
+cgroup are annotations, not identity.
+_Avoid_: resource, entity, target, object
+
+**Window**:
+The time interval a Report covers, cited by id with a half-open start and end.
+_Avoid_: period, bucket, range
+
+**Predicate**:
+An optional numeric comparison recorded on Evidence: the observed value, an operator
+from a closed set, and the bound that was used.
+_Avoid_: threshold (the configured bound; the Predicate is the comparison that fired)
+
+**Gap**:
+A required source that was absent, with a reason. An insufficient-evidence
+Conclusion rests on at least one Gap.
+_Avoid_: missing data, error

@@ -54,8 +54,9 @@ Restarting the server loses the list. Wiring `Subscribe(cpu)` lives in
   that welds the wire to the vocabulary.
 - **PostgreSQL (or SQLite) in this slice:** rejected — Memory behind
   append/list is enough; a vacant adapter is debt.
-- **GET returns an evidence-chain report:** rejected — that is issue 0003;
-  this slice proves receive and list.
+- **GET returns an evidence-chain report:** rejected for this slice — the
+  model is the [report and evidence-chain](2026-10-26-report-evidence-model.md)
+  note; `GET /records` remains receive-and-list.
 
 ## Consequences
 

@@ -27,6 +27,7 @@ Every architectural decision for the rewrite settled, plus a walking skeleton pr
 - 0001 · CPU-scheduling collection constraints: baseline kernel 5.8, floor 4.9; in-kernel aggregation; protocol budget 10⁵–10⁶ events/s/host ([note](../.agents/notes/implemented/architecture/2026-10-25-cpu-sched-collection-constraints.md)).
 - 0002 · QEMU guest image: openEuler 24.03 LTS, Ubuntu 24.04 fallback; unprivileged QEMU ([note](../.agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md)).
 - 0011 · Compile-time domain bundles over a zero-branch record bus ([note](../.agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md)).
+- 0003 · Report is one Conclusion plus Evidence over one Window; Analyzers produce complete Reports ([note](../.agents/notes/implemented/architecture/2026-10-26-report-evidence-model.md)).
 
 ## Not yet specified
 

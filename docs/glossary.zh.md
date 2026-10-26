@@ -19,8 +19,8 @@ _避免使用_：plugin（我们编译期编入，没有运行时加载）
 _避免使用_：driver、provider
 
 **分析器（Analyzer）**：
-域包在 server 侧的对应实现：在 server 总线上订阅该域的记录，把它们解读为发现与证据。
-_避免使用_：rule engine、processor
+域包在 server 侧的对应实现：在 server 总线上订阅该域的 Record，产出 Report。
+_避免使用_：rule engine、processor、finding
 
 **记录总线（Record bus）**：
 进程内的类型化记录管线。agent 与 server 各有一条，都保持零域分支——新的记录种类靠注册进入，从不靠修改核心。
@@ -40,7 +40,7 @@ _避免使用_：framework、context
 
 **契约包（Contracts）**：
 agent 与 server 共享的、按域划分的纯类型包（`contracts/<domain>`）：记录类型与常量，零实现。
-_避免使用_：API、schema（这两个词留给线上协议，见票 0006）
+_避免使用_：API、schema（这两个词留给线上协议）
 
 **记录（Record）**：
 域包发布的一条观察：载荷、所属域、发出时由 runtime 盖上的墙钟时间。一次原始的内核发生（如一条 sched_switch）是内核事件；记录是内核内聚合从事件中产出的东西。
@@ -53,3 +53,33 @@ _避免使用_：framework、kernel
 **核心（Core）**：
 每个进程里不含域知识的部分：agent 侧是记录总线与运行时工具箱；server 侧是共享的摄取/窗口/报告管线。域只能经注册进入核心。
 _避免使用_：kernel、host
+
+## 诊断
+
+**报告（Report）**：
+人审计的文档：一条 Conclusion、它所依据的 Evidence、以及它所覆盖的 Window。不可变；再跑一次是另一份 Report。
+_避免使用_：finding、problem card、diagnosis result
+
+**结论（Conclusion）**：
+对一个 Subject 的带类型断言：kind、该 Subject、以及 stance（成立、不成立或证据不足）。给人看的句子由这三项生成，不作为主数据存储。
+_避免使用_：finding、verdict、root cause
+
+**证据（Evidence）**：
+Conclusion 所依据的一条：不透明的 kind、payload、以及依据列表（一条 Record 快照、一个 Window、本 Report 内另一条 Evidence、或一个 Gap）。
+_避免使用_：citation、attachment、justification
+
+**主体（Subject）**：
+Conclusion 所断言的类型化身份：host、pid、tid、以及任务 starttime（避免 PID 复用把两个任务当成同一个）。进程级断言的 tid 为空。comm 与 cgroup 只做注解，不当身份。
+_避免使用_：resource、entity、target、object
+
+**窗口（Window）**：
+一份 Report 所覆盖的时间区间，用 id 加上半开的起止引用。
+_避免使用_：period、bucket、range
+
+**谓词（Predicate）**：
+记录在 Evidence 上的可选数值比较：观测值、闭集中的算子、以及这次用过的边界。
+_避免使用_：threshold（配置中的边界；Predicate 是这次打出来的比较）
+
+**缺口（Gap）**：
+该有却没有的源，带原因。证据不足的 Conclusion 至少依据一条 Gap。
+_避免使用_：missing data、error

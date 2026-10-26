@@ -27,7 +27,7 @@ agent 到 server 是主动外连的 HTTP JSON（`POST /records`，`{domain， at
 - **现在就上 gRPC + protobuf**：否决——Tick 不需要；给人的 GET 已经是 JSON。以后换传输是再写订阅者/接收端。
 - **在 `contracts/` 上打 JSON 标签，或 Analyzer 直接读 HTTP body**：否决——那是把线协议焊进词汇。
 - **现在就上 PostgreSQL（或 SQLite）**：否决——追加/列出后面的 Memory 就够；空适配器是债。
-- **GET 返回证据链报告**：否决——那是票 0003；这次只证明接收和列出。
+- **GET 返回证据链报告**：否决（仅这次）——模型见[报告与证据链]（2026-10-26-report-evidence-model.zh.md）笔记；`GET /records` 仍是接收和列出。
 
 ## 后果
 
