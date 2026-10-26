@@ -4,8 +4,8 @@
 # along and re-record with:
 #   scripts/verify-translation-pair.sh --write docs/glossary.md
 /glossary:
-  en: 10235f720223d325
-  zh: 85b85e9ea8a8c680
+  en: 691ab5132dcc3089
+  zh: fbd862f8cc872876
 /glossary/language:
   en: a4e8b5139e90d51a
   zh: 5b56a6cf0284650b

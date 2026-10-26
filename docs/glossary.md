@@ -1,6 +1,6 @@
 # KOSMOS
 
-English | [中文](GLOSSARY.zh.md)
+English | [中文](glossary.zh.md)
 
 KOSMOS diagnoses anomalies on Linux virtual machines and hosts: agents collect
 in-kernel evidence via eBPF; a central server runs the diagnosis. This glossary fixes

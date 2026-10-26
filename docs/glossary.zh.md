@@ -1,6 +1,6 @@
 # KOSMOS
 
-[English](GLOSSARY.md) | 中文
+[English](glossary.md) | 中文
 
 KOSMOS 诊断 Linux 虚拟机与物理主机上的异常：agent 经 eBPF 在内核内取证，中心服务器执行诊断。本术语表约定项目自身的词汇。
 
