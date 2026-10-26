@@ -42,7 +42,7 @@ Restarting the server loses the list. Wiring `Subscribe(cpu)` lives in
 - **Treat the Record bus as a message queue (Kafka/NATS/RabbitMQ):** rejected
   — the bus is in-process fan-out; an external broker is another ops surface
   at one server / tens of agents.
-- **Free-form tags on Records, core switches on tags:** rejected — `Domain`
+- **Free-form tags on Records, domain-free packages switch on tags:** rejected — `Domain`
   is the collection-domain key from compiled-in bundles; subscribers register.
 - **Diagnose on the agent:** rejected — footprint lives on the target
   machine; diagnosis belongs to server analyzers.
@@ -61,7 +61,7 @@ Restarting the server loses the list. Wiring `Subscribe(cpu)` lives in
 ## Consequences
 
 curl against `GET /records` accepts the slice. JSON will not carry 10⁵
-Records/s/host: change `upload` and `httpapi`, not the cores or contracts.
+Records/s/host: change `upload` and `httpapi`, not the record bus, runtime kit, or contracts.
 Memory store does not survive restart. Reconnection is "drop on HTTP
 failure"; backpressure is the 64-slot buffer. Server-instructed collection
 activation is not this path.

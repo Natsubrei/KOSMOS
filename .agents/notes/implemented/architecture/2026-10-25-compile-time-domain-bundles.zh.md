@@ -6,15 +6,15 @@ Status: implemented
 
 ## 问题
 
-KOSMOS 必须持续吸收新的采集目标。若管线核心为每个域写分支，每加一个域都要改核心。运行时插件加载会在目标机上长出工具链或装载器安全面，而 agent 必须保持单个低开销静态二进制，eBPF 的 C 代码反正要在树内编译。
+KOSMOS 必须持续吸收新的采集目标。若记录总线为每个域写分支，每加一个域都要改总线。运行时插件加载会在目标机上长出工具链或装载器安全面，而 agent 必须保持单个低开销静态二进制，eBPF 的 C 代码反正要在树内编译。
 
 ## 决策
 
-扩展单元是**域包**：一个自包含的编译期包，实现一个采集域——eBPF C 程序、map schema、解码器、记录类型、可选的富集器——拥有自己的 maps 与 ring buffer，注册进进程内注册表。管线核心（agent 的采集总线与 server 侧同构的摄取总线）保持**零域分支**：新增一个域不改核心任何一行。跨域共享只经 `contracts/<domain>` 纯类型包；禁止 import 兄弟域，由 `scripts/check-layering.sh` 基于 `go list -deps` 强制。
+扩展单元是**域包**：一个自包含的编译期包，实现一个采集域——eBPF C 程序、map schema、解码器、Record 类型、可选的富集器——拥有自己的 maps 与 ring buffer，注册进进程内注册表。agent 的记录总线与 server 侧同构的接收总线保持**零域分支**：新增一个域不改这些包的任何一行。跨域共享只经 `contracts/<domain>` 纯类型包；禁止 import 兄弟域，由 `scripts/check-layering.sh` 基于 `go list -deps` 强制。
 
 单个 Go module（`github.com/natsubrei/kosmos`）：`cmd/agent`、`cmd/server`、`internal/{agent，server}`、`contracts/<domain>`。v1 激活是本地配置驱动 Start/Stop；由 server 指令激活时只换驱动，不换这套架构。
 
-非目标：不做运行时插件加载；不做配置 DSL 或动态 schema 注册（记录就是 Go 类型）；不做每域并发框架（Runtime 句柄统一管生命周期、排空调度与统计）；不做单机内跨域聚合；不做插件市场、签名与版本协商。
+非目标：不做运行时插件加载；不做配置 DSL 或动态 schema 注册（Record 就是 Go 类型）；不做每域并发框架（Runtime handle 统一管生命周期、排空调度与统计）；不做单机内跨域聚合；不做插件市场、签名与版本协商。
 
 ## 考虑过的替代
 
@@ -24,4 +24,4 @@ KOSMOS 必须持续吸收新的采集目标。若管线核心为每个域写分�
 
 ## 后果
 
-新增一个域是新包加一行注册。层级门禁会拦住兄弟域 import 或学了某个域的核心包。核心保持通用。新域需要重新编译 agent 二进制。
+新增一个域是新包加一行注册。层级门禁会拦住兄弟域 import 或不含域知识却学了某个域的包。那些包保持零域分支。新域需要重新编译 agent 二进制。

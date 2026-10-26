@@ -4,7 +4,8 @@ English | [中文](glossary.zh.md)
 
 KOSMOS diagnoses anomalies on Linux virtual machines and hosts: agents collect
 in-kernel evidence via eBPF; a central server runs the diagnosis. This glossary fixes
-the project's own vocabulary.
+the project's own vocabulary. How those words render in each language is
+[terminology.md](i18n/terminology.md).
 
 ## Language
 
@@ -20,8 +21,8 @@ buffer. One directory, one registration line.
 _Avoid_: plugin (we compile in; nothing loads at runtime)
 
 **Collector**:
-The role a domain bundle plays toward the core: the one interface the core knows —
-start and stop collecting for its domain.
+The role a domain bundle plays toward the runtime kit: start and stop collecting
+for its domain. That is the only interface the runtime kit knows.
 _Avoid_: driver, provider
 
 **Analyzer**:
@@ -31,19 +32,17 @@ _Avoid_: rule engine, processor, finding
 
 **Record bus**:
 The in-process typed-record pipeline. Each side has one (agent, server); both carry
-zero domain branches — new record kinds arrive by registration, never by editing the
-core.
+zero domain branches — new record kinds arrive by registration, never by adding a
+domain branch to the bus.
 _Avoid_: event loop, message queue
 
 **Zero domain branches**:
-The core rule ([compile-time domain bundles](../.agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md)): no core code branches on a specific collection domain — the
-core knows records carry a domain, never any particular one. Domain behavior reaches a
-process only by registration, so adding a domain leaves the core directories untouched.
+The rule ([compile-time domain bundles](../.agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md)): domain-free packages do not branch on a specific collection domain — they know records carry a domain, never any particular one. Domain behavior reaches a process only by registration, so adding a domain leaves those packages untouched.
 _Avoid_: microkernel
 
 **Registry**:
 The process-local table where bundles and analyzers register; the only wiring point
-between cores and domains.
+between domain-free packages and domains.
 _Avoid_: plugin host, container
 
 **Runtime handle**:
@@ -68,12 +67,6 @@ The host-process machinery every bundle shares through its Runtime handle: lifec
 clock stamping, stats, eBPF loading, drain scheduling. Carries no domain knowledge.
 _Avoid_: framework, kernel
 
-**Core**:
-The domain-free part of each process: on the agent, the record bus and the runtime
-kit; on the server, the shared ingest/window/report pipeline. Domains enter only by
-registration.
-_Avoid_: kernel, host
-
 ## Diagnosis
 
 **Report**:
@@ -90,7 +83,7 @@ _Avoid_: finding, verdict, root cause
 **Evidence**:
 One item a Conclusion rests on: an opaque kind, a payload, and a list of what it
 rests on (a Record snapshot, a Window, another Evidence in the same Report, or a
-Gap).
+Missing source).
 _Avoid_: citation, attachment, justification
 
 **Subject**:
@@ -104,11 +97,11 @@ The time interval a Report covers, cited by id with a half-open start and end.
 _Avoid_: period, bucket, range
 
 **Predicate**:
-An optional numeric comparison recorded on Evidence: the observed value, an operator
-from a closed set, and the bound that was used.
+An optional comparison recorded on Evidence: the observed value, an operator, and
+the bound that was used.
 _Avoid_: threshold (the configured bound; the Predicate is the comparison that fired)
 
-**Gap**:
+**Missing source**:
 A required source that was absent, with a reason. An insufficient-evidence
-Conclusion rests on at least one Gap.
-_Avoid_: missing data, error
+Conclusion rests on at least one Missing source.
+_Avoid_: gap, missing data, error

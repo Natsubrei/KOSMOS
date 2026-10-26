@@ -5,7 +5,7 @@ description: Add a KOSMOS collection domain (a diagnosable area like CPU schedul
 
 # New collection domain
 
-Five places, then the gates; the cores stay untouched
+Five places, then the gates; domain-free packages stay untouched
 ([compile-time domain bundles](../../notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md)).
 
 1. **Contracts** — `contracts/<domain>/`: the domain key constant and record
@@ -18,7 +18,7 @@ Five places, then the gates; the cores stay untouched
 3. **Registration** — `cmd/agent/main.go`: construct, `Register`, and
    `Subscribe` the domain key to the reporter.
 4. **Analyzer** — `internal/server/analyzer/<name>/`: subscribes to the
-   domain's records on the server bus (server core lands with the walking
+   domain's records on the server bus (the Analyzer path lands with the walking
    skeleton).
 5. **Gates green**: `bash scripts/check.sh`. The layering gate auto-covers the
    new packages; a red line means the bundle reached across the seam — fix the

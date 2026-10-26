@@ -5,7 +5,7 @@
 #   scripts/verify-translation-pair.sh --write .agents/notes/README.md
 /readme:
   en: 4a7dccc4fe8bfbc5
-  zh: c873a8503481397a
+  zh: 706ccc4f2229e134
 /readme/when-to-write-one:
   en: 6d1c8d792deea8bc
   zh: c12601d79136d068

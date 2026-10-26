@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Layering gate for compile-time domain bundles: contracts are pure types (stdlib only), domain
-# bundles never import sibling domains, and the agent core (everything under
-# internal/agent except domain/) imports no domain — domain knowledge reaches
+# bundles never import sibling domains, and packages under internal/agent except domain/
+# import no domain — domain knowledge reaches
 # the process only by registration in cmd/. Test files are included via
 # go list -deps -test. Violations print one line each and exit nonzero.
 set -euo pipefail
@@ -32,18 +32,18 @@ for p in $(go list ./internal/agent/domain/...); do
   done < <(deps "$p" | grep -F "$module/internal/agent/domain/" | grep -vxF "$p")
 done
 
-# Rule 3: the agent core imports no domain.
+# Rule 3: packages under internal/agent except domain/ import no domain.
 for p in $(go list ./internal/agent/...); do
   case "$p" in
     "$module"/internal/agent/domain/*) continue ;;
   esac
   while IFS= read -r dep; do
-    printf 'layering: core %s imports domain %s — register in cmd/ instead\n' "$p" "$dep"
+    printf 'layering: %s imports domain %s — register in cmd/ instead\n' "$p" "$dep"
     status=1
   done < <(deps "$p" | grep -F "$module/internal/agent/domain/")
 done
 
 if (( status == 0 )); then
-  echo "layering: OK (contracts pure, no sibling-domain imports, core domain-free)"
+  echo "layering: OK (contracts pure, no sibling-domain imports, domain-free packages import no domain)"
 fi
 exit "$status"

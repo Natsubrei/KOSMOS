@@ -29,21 +29,22 @@ The Conclusion rests on at least one Evidence item. There is no separate
 justification field. Evidence is `{id, kind, payload, citations}` with an
 optional **Predicate** `{observed, operator, bound}`. `kind` is an opaque
 string namespaced by collection domain (`cpu.…`), owned by the Analyzer
-package, not by `contracts/`. The core does not branch on kind. Evidence
-ids are unique inside one Report. Predicate operators are the closed set
-`lt | le | gt | ge | eq` and compare numbers.
+package, not by `contracts/`. Domain-free packages do not branch on kind. Evidence
+ids are unique inside one Report. Today's Predicate operators are the closed
+set `lt | le | gt | ge | eq` and compare numbers; a later non-numeric
+comparison still uses Predicate.
 
 Each entry in the rests-on list is a Record snapshot `{domain, at, payload}`
 (the observation used, not every Record in the window), a Window
 `{id, start, end}` with `end` exclusive, another Evidence id in the same
-Report (a DAG, no cycles), or a **Gap** `{source, reason}`. An
-insufficient-evidence Conclusion rests on at least one Gap. Aggregates may
+Report (a DAG, no cycles), or a **Missing source** `{source, reason}`. An
+insufficient-evidence Conclusion rests on at least one Missing source. Aggregates may
 cite only a Window and keep the histogram in payload.
 
 The Analyzer's interface is one Window's Records for its domain in, zero or
-more complete Reports out. The core does not assemble fragments or merge
+more complete Reports out. Nothing besides the Analyzer assembles fragments or merges
 Reports across analyzers; two claims are two Reports. Report types belong
-to the server core. The agent and `contracts/<domain>` do not import them;
+on the server, outside `contracts/`. The agent and `contracts/<domain>` do not import them;
 `contracts/` still hold only Records. A Window may gain fields later; it
 keeps `{id, start, end}` and a Report always has a Window.
 
@@ -56,9 +57,9 @@ keeps `{id, start, end}` and a Report always has a Window.
 - **Pointer-only Evidence, join live storage to read a Report:** rejected —
   the ingest store is memory and drops on restart; a Report must stay
   readable after Records are gone.
-- **Core-switched Evidence union types:** rejected — that puts collection
-  domains in the core.
-- **Analyzer emits fragments, core assembles the chain:** rejected — one
+- **Domain-free packages switch on Evidence union types:** rejected — that puts collection
+  domains into packages that must stay domain-free.
+- **Analyzer emits fragments, something else assembles the chain:** rejected — one
   adapter would be a hypothetical seam; the Analyzer is the producer.
 - **Agent-assigned global Record ids:** rejected — the agent does not
   diagnose; snapshots identify what was used.
@@ -71,6 +72,6 @@ keeps `{id, start, end}` and a Report always has a Window.
 
 How Windows are cut, how Conclusions are derived, and where bounds are
 configured sit outside this note. The Predicate records the comparison that
-fired; Gap is the missing-source slot. The first Analyzer introduces Report
-types in the server core. `GET /records` remains receive-and-list. Severity,
+fired; Missing source is the slot for a required source that was absent. The first Analyzer introduces Report
+types on the server, outside `contracts/`. `GET /records` remains receive-and-list. Severity,
 a problem-card aggregator, and HTTP paths for Reports are not this note.

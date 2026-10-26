@@ -1,4 +1,4 @@
-# Agent Notes（代理笔记）
+# Agent Notes
 
 [English](README.md) | 中文
 

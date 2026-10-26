@@ -4,11 +4,11 @@
 # along and re-record with:
 #   scripts/verify-translation-pair.sh --write docs/glossary.md
 /glossary:
-  en: 691ab5132dcc3089
-  zh: fbd862f8cc872876
+  en: 4eae898db3799aa3
+  zh: 4159535682a65560
 /glossary/language:
-  en: 2dde9993cf54a953
-  zh: bdef30c9f503a6a9
+  en: 9be36b8059f43d9a
+  zh: ba275fae01703f95
 /glossary/diagnosis:
-  en: 907308b8a036582e
-  zh: 1e60f3f3c1443ecf
+  en: deab39ce356adb7d
+  zh: d6c3dde198ec0527

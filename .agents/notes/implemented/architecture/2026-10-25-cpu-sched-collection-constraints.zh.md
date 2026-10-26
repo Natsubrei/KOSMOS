@@ -23,4 +23,4 @@ CPU 调度诊断需要在真实主机上观察内核侧信号。`sched_switch` �
 
 ## 后果
 
-探针与协议必须按压缩后的记录来设计，而不是原始 tracepoint。4.9–5.7 的主机走降级附着路径。steal time 不是 tracepoint 形态的记录。
+探针与协议必须按压缩后的 Record 来设计，而不是原始 tracepoint。4.9–5.7 的主机走降级附着路径。steal time 不是 tracepoint 形态的 Record。

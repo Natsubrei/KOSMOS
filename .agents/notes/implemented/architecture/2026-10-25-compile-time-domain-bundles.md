@@ -6,8 +6,8 @@ English | [中文](2026-10-25-compile-time-domain-bundles.zh.md)
 
 ## Problem
 
-KOSMOS must absorb new collection targets continuously. If the pipeline cores
-branch on each domain, every new domain edits the core. Runtime plugin loading
+KOSMOS must absorb new collection targets continuously. If the record bus
+branches on each domain, every new domain edits that bus. Runtime plugin loading
 would put a toolchain or a loader security surface on the target machine, where
 the agent must remain a single low-overhead static binary, and eBPF C still has
 to compile in-tree.
@@ -17,9 +17,9 @@ to compile in-tree.
 The extension unit is the **domain bundle**: a self-contained compile-time
 package for one collection domain — eBPF C program, map schema, decoder, record
 types, optional enricher — with its own maps and ring buffer, registered in a
-process-local registry. The pipeline cores (the agent's collection bus and the
-server's isomorphic ingest bus) carry **zero domain branches**: adding a domain
-changes no core line. Cross-domain sharing goes only through
+process-local registry. The agent's record bus and the server's isomorphic
+receive bus carry **zero domain branches**: adding a domain changes no line in
+those packages. Cross-domain sharing goes only through
 `contracts/<domain>` pure-type packages; sibling-domain imports are banned and
 enforced by `scripts/check-layering.sh` over `go list -deps`.
 
@@ -49,5 +49,5 @@ inside one host; no plugin marketplace, signing, or version negotiation.
 ## Consequences
 
 Adding a domain is a new package plus one registration line. The layering gate
-fails a sibling-domain import or a core package that learns a domain. The cores
-stay generic. A new domain requires a rebuild of the agent binary.
+fails a sibling-domain import or a domain-free package that learns a domain.
+Those packages stay domain-free. A new domain requires a rebuild of the agent binary.
