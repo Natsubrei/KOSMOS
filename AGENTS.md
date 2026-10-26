@@ -9,7 +9,7 @@ KOSMOS is a client-server tool for diagnosing anomalies on Linux virtual machine
 
 ## Language
 
-English: this file, ADRs, code comments, commit messages. Human-facing docs are bilingual pairs — `foo.md` (English) + `foo.zh.md` (Chinese); either side may be authored, sync the counterpart minimally in the same change. `docs/glossary.md` is such a pair, gated by `scripts/verify-glossary-pair.sh`: after editing either side, bring the other along and re-record the hash sidecar `docs/glossary.i18n.yaml`. Chinese prose uses full-width punctuation; inline code, URLs, and identifiers keep ASCII.
+English: this file, code comments, commit messages. Human-facing docs — the glossary and Agent Notes included — are bilingual pairs, `foo.md` (English) + `foo.zh.md` (Chinese); either side may be authored, sync the counterpart minimally in the same change. Pairs are gated by `scripts/verify-translation-pair.sh`: after editing either side, bring the other along and re-record the `<doc>.i18n.yaml` sidecar. Chinese prose uses full-width punctuation; inline code, URLs, and identifiers keep ASCII.
 
 ## Conventions
 
@@ -17,6 +17,7 @@ English: this file, ADRs, code comments, commit messages. Human-facing docs are 
 - One explanation has one home; essential contract facts may repeat locally — link the owning document for architecture and rationale.
 - TODO markers by urgency: `FIXME` blocks a release, `TODO` means fix soon, `XXX` may be fixed someday, no commitment.
 - Agent Notes record durable decision rationale — alternatives and consequences; mechanical changes are exempt.
+- Repo-specific workflows live as skills under `.agents/skills/`.
 - Evidence does not survive a history rewrite: after a rebase or forced push, re-run the affected checks before treating the branch as verified.
 - Push rewritten branches with `--force-with-lease` and abort on remote movement; raw `--force` is forbidden.
 - Report only the commands actually run; never claim a check that was not executed.

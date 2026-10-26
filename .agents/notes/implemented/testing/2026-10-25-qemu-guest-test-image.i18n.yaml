@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for .agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md
+/2026-10-25-qemu-guest-test-image:
+  en: 7b1cfb294b9e27ae
+  zh: 925da276d57463a7
+/2026-10-25-qemu-guest-test-image/problem:
+  en: df1e8d8492ade8e3
+  zh: fba106d4a1f35583
+/2026-10-25-qemu-guest-test-image/decision:
+  en: e287a96fa37bc864
+  zh: 729e55ec74da4d11
+/2026-10-25-qemu-guest-test-image/alternatives-considered:
+  en: df91de38ac8bb1f6
+  zh: e28c1becad6e583b
+/2026-10-25-qemu-guest-test-image/consequences:
+  en: f6d013188055baa5
+  zh: 7c6d156779527061

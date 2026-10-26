@@ -36,7 +36,7 @@ core.
 _Avoid_: event loop, message queue
 
 **Zero domain branches**:
-The core rule (ADR 0001): no core code branches on a specific collection domain — the
+The core rule ([compile-time domain bundles](../.agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md)): no core code branches on a specific collection domain — the
 core knows records carry a domain, never any particular one. Domain behavior reaches a
 process only by registration, so adding a domain leaves the core directories untouched.
 _Avoid_: microkernel

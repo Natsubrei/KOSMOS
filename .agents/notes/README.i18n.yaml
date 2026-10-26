@@ -1,0 +1,17 @@
+# Bilingual-pair consistency record for .agents/notes/README.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/README.md
+/readme:
+  en: 4a7dccc4fe8bfbc5
+  zh: c873a8503481397a
+/readme/when-to-write-one:
+  en: 6d1c8d792deea8bc
+  zh: c12601d79136d068
+/readme/layout-and-status:
+  en: 85b362e981c73e3a
+  zh: d567fc6d8a00d220
+/readme/the-file-format:
+  en: 32afa519125797d5
+  zh: cd6071002133bfa7

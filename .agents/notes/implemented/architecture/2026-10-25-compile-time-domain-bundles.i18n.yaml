@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for .agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md
+/2026-10-25-compile-time-domain-bundles:
+  en: ab7294fcaaf2e413
+  zh: 2a64b0f98a803342
+/2026-10-25-compile-time-domain-bundles/problem:
+  en: 2a95070be48e56fa
+  zh: 66e7f5344b87dd37
+/2026-10-25-compile-time-domain-bundles/decision:
+  en: 4d15293b3dc919e9
+  zh: 9cfc06e688883021
+/2026-10-25-compile-time-domain-bundles/alternatives-considered:
+  en: 711e6b5a516729c0
+  zh: 10ba2778d228cc35
+/2026-10-25-compile-time-domain-bundles/consequences:
+  en: fb2795abfbd70c13
+  zh: 266914710e463358
