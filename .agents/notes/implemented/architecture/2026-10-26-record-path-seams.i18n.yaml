@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for .agents/notes/implemented/architecture/2026-10-26-record-path-seams.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/implemented/architecture/2026-10-26-record-path-seams.md
+/2026-10-26-record-path-seams:
+  en: 701c53fa4264f530
+  zh: 3e01bfbc086315dc
+/2026-10-26-record-path-seams/problem:
+  en: c4654d4aa79fd9c4
+  zh: 2f526c759c333495
+/2026-10-26-record-path-seams/decision:
+  en: 3548427bba593d4a
+  zh: 4d76283ec6f58094
+/2026-10-26-record-path-seams/alternatives-considered:
+  en: c110edf6eb870944
+  zh: 0f64d1f3cdc5cd14
+/2026-10-26-record-path-seams/consequences:
+  en: 2fead8a2432cd918
+  zh: efa9b565850acbde
