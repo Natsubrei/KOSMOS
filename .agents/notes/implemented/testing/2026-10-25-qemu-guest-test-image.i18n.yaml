@@ -10,11 +10,17 @@
   en: df1e8d8492ade8e3
   zh: fba106d4a1f35583
 /2026-10-25-qemu-guest-test-image/decision:
-  en: e287a96fa37bc864
-  zh: 729e55ec74da4d11
+  en: 3ddf84dc4be66bc5
+  zh: 8f6d00bfb355500a
+/2026-10-25-qemu-guest-test-image/the-provisioned-stack:
+  en: 44abc552791a9a2c
+  zh: 0431848387efdffb
+/2026-10-25-qemu-guest-test-image/boot-cost-and-access-path:
+  en: 14e4d93fc8bc7503
+  zh: 48a5ddfd2a088144
 /2026-10-25-qemu-guest-test-image/alternatives-considered:
-  en: df91de38ac8bb1f6
-  zh: e28c1becad6e583b
+  en: 09483e017adacee6
+  zh: 7f061a5b6416374e
 /2026-10-25-qemu-guest-test-image/consequences:
-  en: f6d013188055baa5
-  zh: 7c6d156779527061
+  en: 7d56d14f483a41de
+  zh: 03a7373c427ae49e

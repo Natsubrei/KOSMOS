@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for test/qemu/README.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write test/qemu/README.md
+/readme:
+  en: 94ab4fd586d4f2c3
+  zh: d522aa146c2fc3bd
+/readme/prerequisites:
+  en: 3bc82dcfe52484ea
+  zh: 87ef4cad189a19e1
+/readme/use:
+  en: 635271780974bfc9
+  zh: 1da4869fb1e8f6c0
+/readme/access-path:
+  en: f899945f82b372a9
+  zh: 9e3b82cb172c75c5
+/readme/knobs:
+  en: c4b22122d926e0f1
+  zh: 65a4bc4359b8a7ba

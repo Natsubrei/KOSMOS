@@ -28,4 +28,4 @@ English: this file, code comments, commit messages. Human-facing docs — the gl
 ## Deployment and testing
 
 - The server side deploys fully containerized.
-- Agents are tested inside a QEMU Linux guest that itself runs in a container: eBPF probes run against a real guest kernel with no host-level privileges.
+- Agents are tested inside a QEMU Linux guest that itself runs in a container: eBPF probes run against a real guest kernel with no host-level privileges. That guest is [test/qemu](test/qemu/README.md); `test/qemu/smoke.sh` boots it and proves an agent upload reaches the server.

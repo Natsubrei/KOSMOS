@@ -28,6 +28,7 @@ Every architectural decision for the rewrite settled, plus a walking skeleton pr
 - 0002 · QEMU guest image: openEuler 24.03 LTS, Ubuntu 24.04 fallback; unprivileged QEMU ([note](../.agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md)).
 - 0011 · Compile-time domain bundles over a zero-branch record bus ([note](../.agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md)).
 - 0003 · Report is one Conclusion plus Evidence over one Window; Analyzers produce complete Reports ([note](../.agents/notes/implemented/architecture/2026-10-26-report-evidence-model.md)).
+- 0009 · QEMU test guest: `test/qemu/` boots openEuler 24.03 LTS unprivileged (13 s to SSH, BTF present) and proves an agent upload reaches the server ([note](../.agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md)).
 
 ## Not yet specified
 
