@@ -1,0 +1,15 @@
+#cloud-config
+# Rendered by the entrypoint: __SSH_AUTHORIZED_KEY__ becomes the host's public
+# key so the test runner can scp the agent binary in and start it.
+users:
+  - default
+  - name: kosmos
+    gecos: KOSMOS test
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - __SSH_AUTHORIZED_KEY__
+ssh_pwauth: false
+package_update: false
+runcmd:
+  - [ sh, -c, 'echo provisioned > /etc/kosmos-provisioned' ]
