@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Pre-push: the test tier. Everything else belongs to the pre-commit
+# checkpoints or to CI, which runs scripts/check.sh.
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+exec go test -race ./...

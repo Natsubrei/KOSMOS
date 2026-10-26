@@ -20,9 +20,8 @@ Five places, then the gates; the cores stay untouched
 4. **Analyzer** — `internal/server/analyzer/<name>/`: subscribes to the
    domain's records on the server bus (server core lands with the walking
    skeleton).
-5. **Gates green**: `gofmt -l .`, `go vet ./...`, `go test -race ./...`,
-   `bash scripts/check-layering.sh`. The layering gate auto-covers the new
-   packages; a red line means the bundle reached across the seam — fix the
+5. **Gates green**: `bash scripts/check.sh`. The layering gate auto-covers the
+   new packages; a red line means the bundle reached across the seam — fix the
    code, and the gate stays.
 
 Records carry what survived in-kernel reduction; the wire budget is 10^5

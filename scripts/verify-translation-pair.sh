@@ -5,7 +5,10 @@
 # (<doc>.i18n.yaml). After editing either side of a pair, bring the other
 # along, then re-record:
 #   scripts/verify-translation-pair.sh --write docs/glossary.md
+#   scripts/verify-translation-pair.sh --cached docs/glossary.md
 # With no document arguments, every pair that has a sidecar is verified.
+# --cached reads both sides and the record from the index, so an unstaged edit
+# cannot pass a commit.
 # Sections pair positionally; keys come from the English headings, so
 # translated Chinese headings do not break the record. Translation quality
 # is review's job. The Chinese side uses full-width punctuation outside its
@@ -15,14 +18,25 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 write=0
+cached=0
 docs=()
 for arg in "$@"; do
   case "$arg" in
     --write) write=1 ;;
+    --cached) cached=1 ;;
     --*) printf 'verify-translation-pair: unknown option %s\n' "$arg" >&2; exit 2 ;;
     *) docs+=("$arg") ;;
   esac
 done
+
+if (( cached && write )); then
+  printf 'verify-translation-pair: --cached and --write are exclusive\n' >&2
+  exit 2
+fi
+if (( cached )); then
+  tmpdir=$(mktemp -d)
+  trap 'rm -rf "$tmpdir"' EXIT
+fi
 
 if (( write && ${#docs[@]} == 0 )); then
   printf 'verify-translation-pair: --write needs explicit document paths\n' >&2
@@ -113,25 +127,48 @@ half_width_punct() {
 }
 
 status=0
+# index_copy <path>: copy the staged blob for path into $tmpdir under its own
+# basename (section keys derive from the filename). Returns 1 when the index
+# has no such path.
+index_copy() {
+  local path=$1
+  git cat-file -e ":$path" 2>/dev/null || return 1
+  git show ":$path" > "$tmpdir/$(basename "$path")"
+}
+
 for doc in "${docs[@]}"; do
   en="$doc"
   zh="${doc%.md}.zh.md"
   record="${doc%.md}.i18n.yaml"
 
   missing=0
-  for f in "$en" "$zh"; do
-    if [[ ! -f $f ]]; then
-      printf 'verify-translation-pair: %s: missing %s\n' "$doc" "$f" >&2
-      missing=1
-    fi
-  done
+  if (( cached )); then
+    for f in "$en" "$zh"; do
+      if ! index_copy "$f"; then
+        printf 'verify-translation-pair: %s: %s is not staged\n' "$doc" "$f" >&2
+        missing=1
+      fi
+    done
+    index_copy "$record" || true
+    en="$tmpdir/$(basename "$en")"
+    zh="$tmpdir/$(basename "$zh")"
+    record="$tmpdir/$(basename "$record")"
+  else
+    for f in "$en" "$zh"; do
+      if [[ ! -f $f ]]; then
+        printf 'verify-translation-pair: %s: missing %s\n' "$doc" "$f" >&2
+        missing=1
+      fi
+    done
+  fi
   if (( missing )); then
     status=1
     continue
   fi
 
   if ! punct=$(half_width_punct "$zh"); then
-    printf 'verify-translation-pair: %s:\n%s\n' "$zh" "$punct" >&2
+    if (( cached )); then punct=${punct//$tmpdir\//}; fi
+    printf 'verify-translation-pair: %s:\n%s\n' "$doc" "$punct" >&2
     status=1
     continue
   fi
@@ -204,7 +241,7 @@ for doc in "${docs[@]}"; do
   done
 
   if (( doc_status == 0 )); then
-    printf 'verify-translation-pair: %s OK (%d sections)\n' "$en" "${#en_k[@]}"
+    printf 'verify-translation-pair: %s OK (%d sections)\n' "$doc" "${#en_k[@]}"
   fi
   status=$((status + doc_status))
 done

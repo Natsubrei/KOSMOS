@@ -12,8 +12,7 @@ KOSMOS is a client-server tool for diagnosing anomalies on Linux virtual machine
 
 ## Development
 
-- Run `scripts/check.sh` before reporting a change complete; it stops at the
-  first red gate (formatting, vet, tests, layering, bilingual pairs, links).
+- `scripts/check.sh` is the full gate — formatting, vet, tests, layering, bilingual pairs, Markdown links — and is what CI runs. The pre-commit hook checks only what matches the staged files; pre-push runs the tests.
 - Evidence does not survive a history rewrite: after a rebase or forced push, re-run the affected checks before treating the branch as verified.
 - Push rewritten branches with `--force-with-lease` and abort on remote movement; raw `--force` is forbidden.
 - Report only the commands actually run; never claim a check that was not executed.

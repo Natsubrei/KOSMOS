@@ -1,4 +1,41 @@
 #!/usr/bin/env bash
-# Pre-commit: run the same gates as scripts/check.sh. Bypass with
-# `git commit --no-verify` only for a knowingly red checkpoint.
-exec bash "$(dirname "$0")/../../scripts/check.sh"
+# Pre-commit checkpoints: only the gates that match staged files, and no
+# tests. CI owns the full matrix (scripts/check.sh); pre-push runs the tests.
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[[ -z $staged ]] && exit 0
+
+git diff --cached --check
+
+go_files=$(printf '%s\n' "$staged" | grep -E '\.go$' || true)
+if [[ -n $go_files ]]; then
+  unformatted=$(printf '%s\n' "$go_files" | xargs gofmt -l || true)
+  if [[ -n $unformatted ]]; then
+    printf 'pre-commit: not gofmt-clean (run gofmt -w):\n%s\n' "$unformatted" >&2
+    exit 1
+  fi
+  go vet ./...
+fi
+
+pair_docs=$(
+  printf '%s\n' "$staged" \
+    | grep -E '\.(md|zh\.md|i18n\.yaml)$' \
+    | sed -e 's/\.zh\.md$/.md/' -e 's/\.i18n\.yaml$/.md/' \
+    | sort -u \
+    | while IFS= read -r doc; do
+        record="${doc%.md}.i18n.yaml"
+        if git cat-file -e ":$record" 2>/dev/null || [[ -f $record ]]; then
+          printf '%s\n' "$doc"
+        fi
+      done
+)
+if [[ -n $pair_docs ]]; then
+  # Word splitting is intended: one document path per word.
+  bash scripts/verify-translation-pair.sh --cached $pair_docs
+fi
+
+if printf '%s\n' "$staged" | grep -qE '\.md$'; then
+  bash scripts/verify-md-links.sh
+fi
