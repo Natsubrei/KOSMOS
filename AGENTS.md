@@ -23,7 +23,7 @@ KOSMOS is a client-server tool for diagnosing anomalies on Linux virtual machine
 
 ## Language
 
-English: this file, code comments, commit messages. Human-facing docs — the glossary and Agent Notes included — are bilingual pairs, `foo.md` (English) + `foo.zh.md` (Chinese); either side may be authored, sync the counterpart minimally in the same change. Pairs are gated by `scripts/verify-translation-pair.sh`: after editing either side, bring the other along and re-record the `<doc>.i18n.yaml` sidecar. Relative Markdown links are gated by `scripts/verify-md-links.sh`. Chinese prose uses full-width punctuation; inline code, URLs, and identifiers keep ASCII.
+English: this file, code comments, commit messages. Human-facing docs — the glossary and Agent Notes included — are bilingual pairs, `foo.md` (English) + `foo.zh.md` (Chinese); either side may be authored, sync the counterpart minimally in the same change. Pairs are gated by `scripts/verify-translation-pair.sh`: after editing either side, bring the other along and re-record the `<doc>.i18n.yaml` sidecar. Relative Markdown links are gated by `scripts/verify-md-links.sh`. How domain terms render in each language is `docs/i18n/terminology.md` (bilingual by construction, not a pair); load it before editing a `.zh.md` file. The pairing gate does not check terminology; do not add a scanner for 不要译作 or first-use glosses. Chinese prose uses full-width punctuation; inline code, URLs, and identifiers keep ASCII.
 
 ## Deployment and testing
 
