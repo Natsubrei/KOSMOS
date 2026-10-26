@@ -45,8 +45,10 @@ The Analyzer's interface is one Window's Records for its domain in, zero or
 more complete Reports out. Nothing besides the Analyzer assembles fragments or merges
 Reports across analyzers; two claims are two Reports. Report types belong
 on the server, outside `contracts/`. The agent and `contracts/<domain>` do not import them;
-`contracts/` still hold only Records. A Window may gain fields later; it
-keeps `{id, start, end}` and a Report always has a Window.
+`contracts/` still hold only Records. The Window value is `{id, host, start, end}`;
+Evidence cites `{id, start, end}`. How the timeline is cut is
+[Time-window cut on one host](2026-10-26-time-window-semantics.md).
+A Report always has a Window.
 
 ## Alternatives considered
 
@@ -70,8 +72,7 @@ keeps `{id, start, end}` and a Report always has a Window.
 
 ## Consequences
 
-How Windows are cut, how Conclusions are derived, and where bounds are
-configured sit outside this note. The Predicate records the comparison that
+How Conclusions are derived and where bounds are configured sit outside this note. The Predicate records the comparison that
 fired; Missing source is the slot for a required source that was absent. The first Analyzer introduces Report
 types on the server, outside `contracts/`. `GET /records` remains receive-and-list. Severity,
 a problem-card aggregator, and HTTP paths for Reports are not this note.

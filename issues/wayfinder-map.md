@@ -28,6 +28,7 @@ Every architectural decision for the rewrite settled, plus a walking skeleton pr
 - 0002 · QEMU guest image: openEuler 24.03 LTS, Ubuntu 24.04 fallback; unprivileged QEMU ([note](../.agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md)).
 - 0011 · Compile-time domain bundles over a zero-branch record bus ([note](../.agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md)).
 - 0003 · Report is one Conclusion plus Evidence over one Window; Analyzers produce complete Reports ([note](../.agents/notes/implemented/architecture/2026-10-26-report-evidence-model.md)).
+- 0004 · Windows are 10s Unix-UTC tiles on one host, cut at diagnosis by domain-free server code ([note](../.agents/notes/implemented/architecture/2026-10-26-time-window-semantics.md)).
 
 ## Not yet specified
 

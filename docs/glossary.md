@@ -93,7 +93,8 @@ cgroup are annotations, not identity.
 _Avoid_: resource, entity, target, object
 
 **Window**:
-The time interval a Report covers, cited by id with a half-open start and end.
+The time interval a Report covers on one host, cited by id with a half-open start
+and end on the same wall clock as Record.at.
 _Avoid_: period, bucket, range
 
 **Predicate**:

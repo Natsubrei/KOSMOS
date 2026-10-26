@@ -18,7 +18,11 @@ Conclusion 至少依据一条 Evidence。没有独立的理由字段。Evidence 
 
 依据列表的每一项是：一条 Record 快照（domain、at、payload，当时用到的那条，不是 Window 内全部）、一个 Window（id、start、end，end 为开区间）、本 Report 内另一条 Evidence 的 id（DAG，无环）、或一个 **Missing source**（source、reason）。证据不足的 Conclusion 至少依据一条 Missing source。聚合可以只引用 Window，把直方图放在 payload。
 
-Analyzer 的接口是：一个 Window 里该域的 Record 进去，零份或多份完整 Report 出来。不另做装配层，也不把多个 Analyzer 的 Report 合成一张；两条断言就是两份 Report。Report 类型在 server 上、在 `contracts/` 之外。agent 和 `contracts/<domain>` 不引用它们；`contracts/` 仍只放 Record。Window 以后可以加字段，但保留 id、start、end；Report 始终有 Window。
+Analyzer 的接口是：一个 Window 里该域的 Record 进去，零份或多份完整 Report 出来。不另做装配层，也不把多个 Analyzer 的 Report 合成一张；两条断言就是两份 Report。Report 类型在 server 上、在 `contracts/` 之外。agent 和 `contracts/<domain>` 不引用它们；`contracts/` 仍只放 Record。Window 值含 id、host、start、end；Evidence 对窗的依据是 id、start、end。时间线怎么切见：
+
+[一台 host 上的时间窗切法](2026-10-26-time-window-semantics.md)
+
+Report 始终有 Window。
 
 ## 考虑过的替代
 
@@ -33,4 +37,4 @@ Analyzer 的接口是：一个 Window 里该域的 Record 进去，零份或多�
 
 ## 后果
 
-Window 怎么切、Conclusion 怎么推导、边界配在哪，都不是本笔记。Predicate 记录这次用过的比较，Missing source 是所需但未出现的源。第一个 Analyzer 会在 server 上、`contracts/` 之外引入 Report 类型。`GET /records` 仍是接收和列出。严重程度、问题卡聚合器、Report 的 HTTP 路径不是本笔记。
+Conclusion 怎么推导、边界配在哪，都不是本笔记。Predicate 记录这次用过的比较，Missing source 是所需但未出现的源。第一个 Analyzer 会在 server 上、`contracts/` 之外引入 Report 类型。`GET /records` 仍是接收和列出。严重程度、问题卡聚合器、Report 的 HTTP 路径不是本笔记。

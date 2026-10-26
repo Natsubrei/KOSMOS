@@ -71,7 +71,7 @@ Conclusion 所断言的类型化身份：host、pid、tid、以及任务 startti
 _避免使用_：resource、entity、target、object
 
 **Window**：
-一份 Report 所覆盖的时间区间，用 id 加上半开的起止引用。
+一份 Report 在一台 host 上覆盖的时间区间，用 id 引用，半开的 start 与 end，时钟与 Record.at 相同。
 _避免使用_：period、bucket、range
 
 **Predicate**：
