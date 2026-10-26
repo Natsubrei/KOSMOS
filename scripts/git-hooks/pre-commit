@@ -21,7 +21,7 @@ fi
 
 pair_docs=$(
   printf '%s\n' "$staged" \
-    | grep -E '\.(md|zh\.md|i18n\.yaml)$' \
+    | { grep -E '\.(md|zh\.md|i18n\.yaml)$' || true; } \
     | sed -e 's/\.zh\.md$/.md/' -e 's/\.i18n\.yaml$/.md/' \
     | sort -u \
     | while IFS= read -r doc; do
