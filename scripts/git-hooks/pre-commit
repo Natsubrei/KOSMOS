@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Pre-commit: run the same gates as scripts/check.sh. Bypass with
+# `git commit --no-verify` only for a knowingly red checkpoint.
+exec bash "$(dirname "$0")/../../scripts/check.sh"
