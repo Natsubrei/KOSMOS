@@ -57,5 +57,9 @@ func run(interval time.Duration, server, user, hostOverride string) error {
 	if err := a.Register(bundle); err != nil {
 		return err
 	}
+	// Control session will Apply the server snapshot; until then, collect cpu.
+	if err := a.Apply([]string{cpucontracts.Domain}); err != nil {
+		return err
+	}
 	return a.Run(ctx)
 }

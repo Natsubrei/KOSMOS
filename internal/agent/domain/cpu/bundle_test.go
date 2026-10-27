@@ -41,6 +41,9 @@ func TestBundleEmitsTicksAndStops(t *testing.T) {
 	if err := a.Register(bundle); err != nil {
 		t.Fatal(err)
 	}
+	if err := a.Apply([]string{cpucontracts.Domain}); err != nil {
+		t.Fatal(err)
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
