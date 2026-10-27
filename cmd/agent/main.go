@@ -11,6 +11,7 @@ import (
 	"time"
 
 	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
+	"github.com/natsubrei/kosmos/internal/agent/control"
 	cpudomain "github.com/natsubrei/kosmos/internal/agent/domain/cpu"
 	"github.com/natsubrei/kosmos/internal/agent/hostid"
 	"github.com/natsubrei/kosmos/internal/agent/report"
@@ -57,8 +58,15 @@ func run(interval time.Duration, server, user, hostOverride string) error {
 	if err := a.Register(bundle); err != nil {
 		return err
 	}
-	// Control session will Apply the server snapshot; until then, collect cpu.
-	if err := a.Apply([]string{cpucontracts.Domain}); err != nil {
+	if server != "" {
+		ctrl := control.Client{
+			BaseURL: server,
+			User:    user,
+			Host:    host,
+			Apply:   a.Apply,
+		}
+		go func() { _ = ctrl.Run(ctx) }()
+	} else if err := a.Apply([]string{cpucontracts.Domain}); err != nil {
 		return err
 	}
 	return a.Run(ctx)

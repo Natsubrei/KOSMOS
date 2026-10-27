@@ -31,7 +31,7 @@ Every architectural decision for the rewrite settled, plus a walking skeleton pr
 - 0004 · Windows are 10s Unix-UTC tiles on one host, cut at diagnosis by domain-free server code ([note](../.agents/notes/proposed/architecture/2026-10-26-time-window-semantics.md)).
 - 0009 · QEMU test guest: `test/qemu/` boots openEuler 24.03 LTS unprivileged (13 s to SSH, BTF present) and proves an agent upload reaches the server ([note](../.agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md)).
 - 0005 · In-process memory for Records and Reports; ingest does not diagnose; one ticker consumer cuts oldest closed Windows ([note](../.agents/notes/proposed/architecture/2026-10-27-storage-async-boundary.md)).
-- 0006 · Agent-outbound HTTP: `POST /records` plus a per-host control session; server enables domains; liveness is the session ([note](../.agents/notes/proposed/architecture/2026-10-27-agent-server-protocol.md)).
+- 0006 · Agent-outbound HTTP: `POST /records` plus a per-host control session; server enables domains; liveness is the session ([note](../.agents/notes/implemented/architecture/2026-10-27-agent-server-protocol.md)).
 
 ## Not yet specified
 

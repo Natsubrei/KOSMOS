@@ -14,7 +14,7 @@ KOSMOS 必须持续吸收新的采集目标。若记录总线为每个域写分�
 
 单个 Go module（`github.com/natsubrei/kosmos`）：`cmd/agent`、`cmd/server`、`internal/{agent,server}`、`contracts/<domain>`。跑哪些域由 server 经控制会话下令；Start/Stop 仍是 Runtime handle。只换驱动，不换这套架构。
 
-[数据通道与控制会话](../../proposed/architecture/2026-10-27-agent-server-protocol.zh.md)
+[数据通道与控制会话](2026-10-27-agent-server-protocol.zh.md)
 
 非目标：不做运行时插件加载；不做配置 DSL 或动态 schema 注册（Record 就是 Go 类型）；不做每域并发框架（Runtime handle 统一管生命周期、排空调度与统计）；不做单机内跨域聚合；不做插件市场、签名与版本协商。
 

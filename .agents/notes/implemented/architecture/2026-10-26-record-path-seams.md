@@ -68,4 +68,4 @@ the JSON array gains that field with the diagnosis loop. Reconnection of
 `POST /records` is drop on HTTP failure; backpressure is the 64-slot buffer.
 Collection activation is the control session, not this path.
 
-[Agent–server protocol: data path and control session](../../proposed/architecture/2026-10-27-agent-server-protocol.md)
+[Agent–server protocol: data path and control session](2026-10-27-agent-server-protocol.md)

@@ -28,7 +28,7 @@ One Go module (`github.com/natsubrei/kosmos`): `cmd/agent`, `cmd/server`,
 server-instructed over the control session; Start/Stop stays the Runtime
 handle. That swaps the driver, not this architecture.
 
-[Agent–server protocol: data path and control session](../../proposed/architecture/2026-10-27-agent-server-protocol.md)
+[Agent–server protocol: data path and control session](2026-10-27-agent-server-protocol.md)
 
 Non-goals: no runtime plugin loading; no config DSL or dynamic schema registry
 (records are Go types); no per-domain concurrency framework (the Runtime handle

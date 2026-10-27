@@ -9,6 +9,7 @@ import (
 
 	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
 	"github.com/natsubrei/kosmos/internal/bus"
+	"github.com/natsubrei/kosmos/internal/server/control"
 	"github.com/natsubrei/kosmos/internal/server/httpapi"
 	"github.com/natsubrei/kosmos/internal/server/store"
 )
@@ -23,10 +24,21 @@ func main() {
 	}
 }
 
+func route(records, ctrl http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/control" {
+			ctrl.ServeHTTP(w, r)
+			return
+		}
+		records.ServeHTTP(w, r)
+	})
+}
+
 func run(listen string) error {
 	b := bus.New()
 	st := store.NewMemory()
 	b.Subscribe(cpucontracts.Domain, st)
+	hub := control.NewHub(func(string) []string { return []string{cpucontracts.Domain} })
 	fmt.Fprintf(os.Stderr, "server: listening on %s\n", listen)
-	return http.ListenAndServe(listen, httpapi.Handler(b, st))
+	return http.ListenAndServe(listen, route(httpapi.Handler(b, st), hub.Handler()))
 }

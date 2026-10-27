@@ -35,6 +35,6 @@ agent 到 server 是主动外连的 HTTP JSON（`POST /records`，JSON 数组，
 
 对 `GET /records` 做 curl 即可验收。JSON 扛不住 10⁵ 条 Record/秒/主机：改 `upload` 和 `httpapi`，不改记录总线、运行时工具箱或契约包。内存存储不能熬过重启。Record 还带 host（见下）；JSON 数组随诊断循环加上该字段。数据通道重连就是 HTTP 失败则丢；背压是 64 槽缓冲。采集激活是控制会话，不是这条路径。
 
-[数据通道与控制会话](../../proposed/architecture/2026-10-27-agent-server-protocol.zh.md)
+[数据通道与控制会话](2026-10-27-agent-server-protocol.zh.md)
 
 [内存存储与接收/诊断边界](../../proposed/architecture/2026-10-27-storage-async-boundary.zh.md)

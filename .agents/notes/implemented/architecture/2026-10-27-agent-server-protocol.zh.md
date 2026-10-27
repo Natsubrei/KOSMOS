@@ -1,6 +1,6 @@
 # Agent Note: Agent–server protocol: data path and control session
 
-Status: proposed
+Status: implemented
 
 [English](2026-10-27-agent-server-protocol.md) | 中文
 
@@ -8,7 +8,7 @@ Status: proposed
 
 `POST /records` 已经用 HTTP JSON 运 Record。agent（采集端）多半在 NAT 后面，server 拨不回去。域包编译进来不等于正在采集：全域都跑会空耗 CPU。没有存活信号时，安静的主机和死掉的 agent 看起来一样。数据传输以后会换（gRPC 是候选）；记录总线和域包不能绑死在某一种传输上。
 
-## 提案
+## 决策
 
 两条通道，都由 agent 出站，这次都是 HTTP，不上 TLS。
 
@@ -33,16 +33,12 @@ Status: proposed
 - **这次上 TLS 或 enrollment**：否决——开发鉴权仍是 `X-User-Id`；加固是以后的鉴权模型。
 - **这次上 gRPC**：否决——给人看的 GET 已是 JSON；缝在订阅者和接收端，不是现在再加一套栈。
 
-## 验收标准
+## 后果
 
-agent 打出控制会话；server 对每个 `host` 一个句柄，下发域快照。应用层保活加上 60 秒停采约束存活，不靠 Record。`POST /records` 仍是数据通道。
+`internal/agent/control` 拨 `POST /control`；`internal/server/control` 对每个 `host` 一个句柄，连上时下发 `{cpu}`。保活 10 秒；会话死后 60 秒停采。Start/Stop 仍是 Runtime handle。TLS 和 enrollment 是以后的鉴权模型。
 
-## 风险
+[记录路径缝](2026-10-26-record-path-seams.zh.md)
 
-会话帧、保活间隔、自动 `{cpu}` 快照随骨架落地。采集的 Start/Stop 仍是 Runtime handle。TLS 和 enrollment 是以后的鉴权模型。
+[内存存储与接收/诊断边界](../../proposed/architecture/2026-10-27-storage-async-boundary.zh.md)
 
-[记录路径缝](../../implemented/architecture/2026-10-26-record-path-seams.zh.md)
-
-[内存存储与接收/诊断边界](2026-10-27-storage-async-boundary.zh.md)
-
-[编译期域包](../../implemented/architecture/2026-10-25-compile-time-domain-bundles.zh.md)
+[编译期域包](2026-10-25-compile-time-domain-bundles.zh.md)
