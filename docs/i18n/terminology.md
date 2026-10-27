@@ -38,6 +38,7 @@
 | Record | Record | | 事件、event | 观测；内核事件仍称 kernel event |
 | Report | Report | | | |
 | Runtime handle | Runtime handle | | | |
+| seam | seam | | 缝、接缝、缝合点 | 一个可以在不改动此处代码的前提下改变行为的位置；与「扩展点」不同 |
 | Subject | Subject | | 资源、对象 | |
 | Window | Window | | | |
 | server | server | | | |

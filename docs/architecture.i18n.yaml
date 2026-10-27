@@ -1,0 +1,26 @@
+# Bilingual-pair consistency record for docs/architecture.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write docs/architecture.md
+/architecture:
+  en: 1a1899d4a5e9b8a4
+  zh: 8b824ba93366877c
+/architecture/two-processes:
+  en: 69055a5e28c2a968
+  zh: a6c7c9268bd3c513
+/architecture/agent:
+  en: ded95287cb194b5c
+  zh: ce4492cc99503d43
+/architecture/server:
+  en: 68c29625802da65e
+  zh: 334818032d388b14
+/architecture/seams:
+  en: 55a33b7ebe70a01a
+  zh: 38c2e32e756019aa
+/architecture/adding-a-collection-domain:
+  en: 52098516fb4ee642
+  zh: 8bfa86ae3fc89ca9
+/architecture/where-decisions-live:
+  en: d476e5e8213b2aa8
+  zh: 3ccb69b489c05208

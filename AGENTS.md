@@ -2,6 +2,8 @@
 
 KOSMOS is a client-server tool for diagnosing anomalies on Linux virtual machines and hosts: agents collect low-overhead in-kernel evidence via eBPF with a small CPU and memory footprint on the target machine; a central server runs the diagnosis. Its code architecture is highly scalable and every design is changeable — the system must absorb continuous change.
 
+Read [docs/architecture.md](docs/architecture.md) before changing a seam: it maps the packages, what runs in which process, and where each variable concern is allowed to appear.
+
 ## Conventions
 
 - Comments describe non-obvious contracts or rationale that code cannot express; they do not restate what code already implies.

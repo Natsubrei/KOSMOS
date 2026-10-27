@@ -6,4 +6,4 @@
 
 ## 开发
 
-代码库约定与 agent 指令见 [AGENTS.md](AGENTS.md)。
+代码库约定与 agent 指令见 [AGENTS.md](AGENTS.md)。当前代码结构见 [architecture.zh.md](docs/architecture.zh.md)。
