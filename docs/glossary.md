@@ -68,6 +68,12 @@ The host-process machinery every bundle shares through its Runtime handle: lifec
 clock stamping, stats, eBPF loading, drain scheduling. Carries no domain knowledge.
 _Avoid_: framework, kernel
 
+**Seam**:
+A place where behavior can be replaced without editing the code at that place: the
+interface callers and tests both cross, with an implementation behind it. Which
+concerns have one is the [architecture map](architecture.md).
+_Avoid_: boundary, layer, hook, extension point
+
 ## Diagnosis
 
 **Report**:

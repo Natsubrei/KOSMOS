@@ -54,6 +54,10 @@ _避免使用_：event（留给内核事件）、message
 每个域包经 Runtime handle 共享的宿主进程机制：生命周期、时钟盖戳、统计、eBPF 加载、排空调度。不含任何域知识。
 _避免使用_：framework、kernel
 
+**Seam**：
+可以在不改动此处代码的前提下替换行为的位置：调用方与测试共同穿过的那道接口，背后是一个实现。哪些关注点有这么一处，见[代码结构](architecture.zh.md)。
+_避免使用_：boundary、layer、hook、扩展点
+
 ## 诊断
 
 **Report**：
