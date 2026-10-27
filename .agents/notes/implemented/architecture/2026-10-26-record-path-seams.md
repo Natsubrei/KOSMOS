@@ -26,7 +26,7 @@ network; a full buffer of 64 drops and counts. In-kernel aggregation remains
 the volume control.
 
 Agent to server is outbound HTTP JSON (`POST /records`, JSON array of
-`{domain, at, payload}`), not an external broker and not gRPC.
+`{host, domain, at, payload}`), not an external broker and not gRPC.
 `cmd/agent -server` enables upload; domain bundles do not import
 `internal/agent/upload`. Contracts have no JSON tags.
 

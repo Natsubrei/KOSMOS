@@ -14,6 +14,7 @@ func TestDeliverWritesOneJSONLine(t *testing.T) {
 	r := NewJSONLines(&buf)
 
 	r.Deliver(bus.Record{
+		Host:    "web-1",
 		Domain:  "cpu",
 		At:      time.Unix(1700000000, 0).UTC(),
 		Payload: struct{ Seq int64 }{Seq: 7},
@@ -24,6 +25,7 @@ func TestDeliverWritesOneJSONLine(t *testing.T) {
 		t.Fatalf("output %q: want exactly one line", buf.String())
 	}
 	for _, want := range []string{
+		`"host":"web-1"`,
 		`"domain":"cpu"`,
 		`"at":"2023-11-14T22:13:20Z"`,
 		`"payload":{"Seq":7}`,

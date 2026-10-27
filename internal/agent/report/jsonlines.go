@@ -24,8 +24,9 @@ func NewJSONLines(w io.Writer) *JSONLines {
 // output ends reporting, it does not end collection.
 func (r *JSONLines) Deliver(rec bus.Record) {
 	_ = r.enc.Encode(struct {
+		Host    string    `json:"host"`
 		Domain  string    `json:"domain"`
 		At      time.Time `json:"at"`
 		Payload any       `json:"payload"`
-	}{rec.Domain, rec.At, rec.Payload})
+	}{rec.Host, rec.Domain, rec.At, rec.Payload})
 }

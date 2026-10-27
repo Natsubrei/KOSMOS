@@ -30,28 +30,34 @@ type Collector interface {
 // only way a bundle touches the host process.
 type Handle struct {
 	domain string
+	host   string
 	bus    *bus.Bus
 	now    func() time.Time
 }
 
-// Emit stamps payload with the bundle's domain and wall-clock time, then
-// publishes it on the record bus.
+// Emit stamps payload with the bundle's domain, host, and wall-clock time,
+// then publishes it on the record bus. An empty host is not published.
 func (h *Handle) Emit(payload any) {
-	h.bus.Publish(bus.Record{Domain: h.domain, At: h.now(), Payload: payload})
+	if h.host == "" {
+		return
+	}
+	h.bus.Publish(bus.Record{Host: h.host, Domain: h.domain, At: h.now(), Payload: payload})
 }
 
 // Agent runs a fixed set of collectors under one lifecycle; it is single-use.
 type Agent struct {
-	bus *bus.Bus
+	bus  *bus.Bus
+	host string
 
 	started  bool
 	cols     []Collector
 	startedC []Collector
 }
 
-// New returns an agent publishing on b.
-func New(b *bus.Bus) *Agent {
-	return &Agent{bus: b}
+// New returns an agent publishing on b, stamping host on every Record.
+// host is the machine identity; how it is chosen is the caller's rule.
+func New(b *bus.Bus, host string) *Agent {
+	return &Agent{bus: b, host: host}
 }
 
 // Register adds a collector. A second collector for the same domain, or a
@@ -76,7 +82,7 @@ func (a *Agent) Register(c Collector) error {
 func (a *Agent) Run(ctx context.Context) error {
 	a.started = true
 	for _, c := range a.cols {
-		if err := c.Start(&Handle{domain: c.Domain(), bus: a.bus, now: time.Now}); err != nil {
+		if err := c.Start(&Handle{domain: c.Domain(), host: a.host, bus: a.bus, now: time.Now}); err != nil {
 			stopErr := a.stopStarted()
 			return fmt.Errorf("runtime: start %s: %w (stop: %v)", c.Domain(), err, stopErr)
 		}

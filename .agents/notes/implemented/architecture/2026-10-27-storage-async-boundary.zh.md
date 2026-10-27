@@ -35,4 +35,4 @@ Record、Report、以及已诊断区间的集合都活在 server 进程里。重
 
 ## 后果
 
-ticker 间隔、agent 如何选定 `host` 字符串、列出 Report 的 HTTP 路径，随第一个 Analyzer 落地。`GET /records` 仍是接收和列出。Record 的 JSON 数组在同一次变更里加上 `host`。Conclusion 怎么推导仍不是本笔记。
+ticker 间隔和列出 Report 的 HTTP 路径，随第一个 Analyzer 落地。`GET /records` 仍是接收和列出。Record 的 JSON 数组带 `host`。agent 怎么选定该字符串是 `internal/agent/hostid`；总线只运结果。Conclusion 怎么推导仍不是本笔记。

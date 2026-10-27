@@ -37,7 +37,7 @@ func TestBundleEmitsTicksAndStops(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	a := runtime.New(b)
+	a := runtime.New(b, "web-1")
 	if err := a.Register(bundle); err != nil {
 		t.Fatal(err)
 	}

@@ -33,7 +33,7 @@ func (f fakeCollector) Stop() error {
 
 func TestRunStopsCollectorsInReverseOrder(t *testing.T) {
 	var events []string
-	a := New(bus.New())
+	a := New(bus.New(), "web-1")
 	if err := a.Register(fakeCollector{domain: "one", events: &events}); err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func TestRunStopsCollectorsInReverseOrder(t *testing.T) {
 func TestRunStartFailureFailsFast(t *testing.T) {
 	var events []string
 	boom := errors.New("boom")
-	a := New(bus.New())
+	a := New(bus.New(), "web-1")
 	if err := a.Register(fakeCollector{domain: "one", events: &events}); err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestRunStartFailureFailsFast(t *testing.T) {
 }
 
 func TestRegisterDuplicateDomain(t *testing.T) {
-	a := New(bus.New())
+	a := New(bus.New(), "web-1")
 	if err := a.Register(fakeCollector{domain: "cpu", events: &[]string{}}); err != nil {
 		t.Fatal(err)
 	}
@@ -92,19 +92,34 @@ func TestRegisterDuplicateDomain(t *testing.T) {
 	}
 }
 
-func TestHandleEmitStampsDomainAndClock(t *testing.T) {
+func TestHandleEmitDropsEmptyHost(t *testing.T) {
+	b := bus.New()
+	ch := make(chan bus.Record, 1)
+	b.Subscribe("cpu", bus.Func(func(rec bus.Record) { ch <- rec }))
+
+	h := &Handle{domain: "cpu", bus: b, now: time.Now}
+	h.Emit("payload")
+
+	select {
+	case rec := <-ch:
+		t.Fatalf("published %+v, want drop", rec)
+	case <-time.After(50 * time.Millisecond):
+	}
+}
+
+func TestHandleEmitStampsDomainClockAndHost(t *testing.T) {
 	b := bus.New()
 	ch := make(chan bus.Record, 4)
 	b.Subscribe("cpu", bus.Func(func(rec bus.Record) { ch <- rec }))
 
 	stamp := time.Unix(1700000000, 0)
-	h := &Handle{domain: "cpu", bus: b, now: func() time.Time { return stamp }}
+	h := &Handle{domain: "cpu", host: "web-1", bus: b, now: func() time.Time { return stamp }}
 	h.Emit("payload")
 
 	select {
 	case rec := <-ch:
-		if rec.Domain != "cpu" || !rec.At.Equal(stamp) || rec.Payload != "payload" {
-			t.Fatalf("record = %+v, want domain cpu at %v payload \"payload\"", rec, stamp)
+		if rec.Domain != "cpu" || rec.Host != "web-1" || !rec.At.Equal(stamp) || rec.Payload != "payload" {
+			t.Fatalf("record = %+v, want host web-1 domain cpu at %v payload \"payload\"", rec, stamp)
 		}
 	case <-time.After(time.Second):
 		t.Fatal("record not delivered")

@@ -14,6 +14,7 @@ import (
 )
 
 type wireRecord struct {
+	Host    string          `json:"host"`
 	Domain  string          `json:"domain"`
 	At      time.Time       `json:"at"`
 	Payload json.RawMessage `json:"payload"`
@@ -38,6 +39,10 @@ func Handler(b *bus.Bus, st store.Store) http.Handler {
 			return
 		}
 		for _, wr := range batch {
+			if wr.Host == "" {
+				http.Error(w, "host", http.StatusBadRequest)
+				return
+			}
 			if wr.Domain == "" {
 				http.Error(w, "domain", http.StatusBadRequest)
 				return
@@ -49,7 +54,7 @@ func Handler(b *bus.Bus, st store.Store) http.Handler {
 					return
 				}
 			}
-			b.Publish(bus.Record{Domain: wr.Domain, At: wr.At, Payload: payload})
+			b.Publish(bus.Record{Host: wr.Host, Domain: wr.Domain, At: wr.At, Payload: payload})
 		}
 		w.WriteHeader(http.StatusNoContent)
 	})
@@ -65,7 +70,7 @@ func Handler(b *bus.Bus, st store.Store) http.Handler {
 				http.Error(w, "encode", http.StatusInternalServerError)
 				return
 			}
-			out = append(out, wireRecord{Domain: rec.Domain, At: rec.At, Payload: raw})
+			out = append(out, wireRecord{Host: rec.Host, Domain: rec.Domain, At: rec.At, Payload: raw})
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(out)

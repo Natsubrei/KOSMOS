@@ -14,7 +14,7 @@ agent 已经在进程内总线上发出 Record。现在要把这些 Record 送�
 
 agent 不做诊断。用户态解码、可做轻量富集、按协议预算上送（稳态 10⁵ / 突发 10⁶ 条 Record/秒/主机）。`internal/agent/upload` 是总线订阅者：`Deliver` 不在网络上阻塞；64 槽缓冲满则丢并计数。内核内聚合仍是体量控制。
 
-agent 到 server 是主动外连的 HTTP JSON（`POST /records`，JSON 数组，元素为 domain、at、payload），不是外部 broker，也不是 gRPC。`cmd/agent -server` 打开上送；域包不 import `internal/agent/upload`。契约包上不打 JSON 标签。
+agent 到 server 是主动外连的 HTTP JSON（`POST /records`，JSON 数组，元素为 `host`、`domain`、`at`、`payload`），不是外部 broker，也不是 gRPC。`cmd/agent -server` 打开上送；域包不 import `internal/agent/upload`。契约包上不打 JSON 标签。
 
 `cmd/server` 听 HTTP。处理函数（`internal/server/httpapi`）把字节变成 Record 并 `Publish`；`internal/server/store` 的 Memory 实现追加/列出，作为总线订阅者把 Record 留下来。`GET /records` 以 JSON 返回该列表。开发认证是非空的 `X-User-Id`。重启 server 列表消失。`Subscribe(cpu)` 的接线在 `cmd/server`，和 `cmd/agent` 里注册域包一样。
 

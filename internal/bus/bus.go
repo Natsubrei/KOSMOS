@@ -9,9 +9,11 @@ import (
 	"time"
 )
 
-// Record is one collected observation. At is wall-clock time stamped by the
-// runtime at emit; producers and consumers never touch clocks.
+// Record is one collected observation. Host is the machine it was collected
+// on; At is wall-clock time. Both are stamped by the runtime at emit;
+// producers and consumers never touch clocks or identity.
 type Record struct {
+	Host    string
 	Domain  string
 	At      time.Time
 	Payload any

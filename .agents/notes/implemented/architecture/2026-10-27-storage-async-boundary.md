@@ -65,7 +65,8 @@ single consumer. It is not a multi-stage pipeline.
 
 ## Consequences
 
-The ticker period, how the agent chooses the `host` string, and HTTP
-paths that list Reports land with the first Analyzer. `GET /records`
-remains receive-and-list. The JSON array of Records gains `host` in that
-same change. How Conclusions are derived is still outside this note.
+The ticker period and HTTP paths that list Reports land with the first
+Analyzer. `GET /records` remains receive-and-list. The JSON array of
+Records carries `host`. How the agent chooses that string is
+`internal/agent/hostid`; the bus only carries the result. How Conclusions
+are derived is still outside this note.

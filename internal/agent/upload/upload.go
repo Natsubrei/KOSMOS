@@ -15,6 +15,7 @@ import (
 )
 
 type wireRecord struct {
+	Host    string    `json:"host"`
 	Domain  string    `json:"domain"`
 	At      time.Time `json:"at"`
 	Payload any       `json:"payload"`
@@ -72,7 +73,7 @@ func (u *Uploader) loop(ctx context.Context) {
 func (u *Uploader) post(recs []bus.Record) {
 	batch := make([]wireRecord, len(recs))
 	for i, rec := range recs {
-		batch[i] = wireRecord{Domain: rec.Domain, At: rec.At, Payload: rec.Payload}
+		batch[i] = wireRecord{Host: rec.Host, Domain: rec.Domain, At: rec.At, Payload: rec.Payload}
 	}
 	body, err := json.Marshal(batch)
 	if err != nil {
