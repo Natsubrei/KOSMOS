@@ -1,12 +1,18 @@
 #!/usr/bin/env bash
 # Bilingual-pair gate:
-# every heading section of an English document must have a counterpart on the
-# Chinese side, and both must hash identically to the record in the sidecar
-# (<doc>.i18n.yaml). After editing either side of a pair, bring the other
-# along, then re-record:
+# every document inside the pairing scope must be a complete pair — `foo.md`,
+# `foo.zh.md`, and its `<doc>.i18n.yaml` record — unless the exclusion manifest
+# names it. A pair's heading sections must pair positionally and both sides
+# must hash identically to the record. Relative links inside a pair must point
+# at the sibling of their own locale. After editing either side, bring the
+# other along, then re-record:
 #   scripts/verify-translation-pair.sh --write docs/glossary.md
 #   scripts/verify-translation-pair.sh --cached docs/glossary.md
-# With no document arguments, every pair that has a sidecar is verified.
+# With no document arguments, every documented pair in scope is verified;
+# `--list` reports each in-scope document's state instead. `--staged` checks the
+# in-scope documents among the staged paths, reading all three files from the
+# index — that is what the pre-commit hook runs, so the scope rule lives only
+# here.
 # --cached reads both sides and the record from the index, so an unstaged edit
 # cannot pass a commit.
 # Sections pair positionally; keys come from the English headings, so
@@ -15,16 +21,30 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+manifest=scripts/pairing-exclusions.txt
+
 write=0
 cached=0
+list=0
+staged_only=0
 docs=()
 for arg in "$@"; do
   case "$arg" in
     --write) write=1 ;;
     --cached) cached=1 ;;
+    --list) list=1 ;;
+    --staged) staged_only=1; cached=1 ;;
     --*) printf 'verify-translation-pair: unknown option %s\n' "$arg" >&2; exit 2 ;;
     *) docs+=("$arg") ;;
   esac
+done
+
+# Normalize foo.zh.md / foo.i18n.yaml / a bare stem to the English anchor.
+for i in "${!docs[@]}"; do
+  doc=${docs[i]%.i18n.yaml}
+  doc=${doc%.zh.md}
+  doc=${doc%.md}
+  docs[i]=$doc.md
 done
 
 if (( cached && write )); then
@@ -36,17 +56,96 @@ if (( cached )); then
   trap 'rm -rf "$tmpdir"' EXIT
 fi
 
-if (( write && ${#docs[@]} == 0 )); then
+# in_scope <path>: the documentation corpus that must be bilingual. Everything
+# else — skills, agent instructions, the temporary issue tracker — is outside.
+in_scope() {
+  case "$1" in
+    README.md | docs/*.md | .agents/notes/*.md | test/*.md) return 0 ;;
+  esac
+  return 1
+}
+
+# pairing_excluded <path>: the manifest holds every deliberate exception, so an
+# unpaired document is a gate failure by default rather than a silent pass.
+# Patterns are bash globs over the whole path; `*` also crosses `/`.
+pairing_excluded() {
+  local path=$1 pattern
+  [[ -f $manifest ]] || return 1
+  while IFS= read -r pattern; do
+    pattern=${pattern%%#*}
+    pattern=${pattern//[[:space:]]/}
+    [[ -z $pattern ]] && continue
+    # shellcheck disable=SC2254 # the manifest holds patterns, not literals
+    case "$path" in
+      $pattern) return 0 ;;
+    esac
+  done < "$manifest"
+  return 1
+}
+
+# pair_state <doc>: complete, missing, or orphan-zh.
+pair_state() {
+  local doc=$1
+  [[ -f $doc && -f ${doc%.md}.zh.md && -f ${doc%.md}.i18n.yaml ]] && {
+    echo complete
+    return
+  }
+  echo missing
+}
+
+if ((list)); then
+  printf '%-12s %s\n' STATE DOCUMENT
+  while IFS= read -r doc; do
+    printf '%-12s %s\n' "$(pair_state "$doc")" "$doc"
+  done < <(
+    git ls-files '*.md' | while IFS= read -r path; do
+      case "$path" in
+        *.zh.md) continue ;;
+      esac
+      in_scope "$path" || continue
+      pairing_excluded "$path" && continue
+      printf '%s\n' "$path"
+    done | sort
+  )
+  exit 0
+fi
+
+if ((write && ${#docs[@]} == 0)); then
   printf 'verify-translation-pair: --write needs explicit document paths\n' >&2
   exit 2
 fi
-if (( ! write && ${#docs[@]} == 0 )); then
-  while IFS= read -r sidecar; do
-    if git check-ignore -q -- "${sidecar#./}"; then
-      continue
-    fi
-    docs+=("${sidecar%.i18n.yaml}.md")
-  done < <(find . -name '*.i18n.yaml' -not -path './.git/*' | sort)
+if ((staged_only && ${#docs[@]} > 0)); then
+  printf 'verify-translation-pair: --staged reads the index; do not pass paths\n' >&2
+  exit 2
+fi
+if ((staged_only)); then
+  while IFS= read -r path; do
+    case "$path" in
+      *.zh.md) continue ;;
+    esac
+    in_scope "$path" || continue
+    pairing_excluded "$path" && continue
+    docs+=("$path")
+  done < <(git diff --cached --name-only --diff-filter=ACMR | sort)
+  if ((${#docs[@]} == 0)); then
+    exit 0
+  fi
+fi
+if ((!write && ${#docs[@]} == 0)); then
+  # Scope enumeration, not a sidecar search: a document that was never
+  # recorded is still required to have its counterpart.
+  while IFS= read -r path; do
+    docs+=("$path")
+  done < <(
+    git ls-files '*.md' | while IFS= read -r path; do
+      case "$path" in
+        *.zh.md) continue ;;
+      esac
+      in_scope "$path" || continue
+      pairing_excluded "$path" && continue
+      printf '%s\n' "$path"
+    done | sort
+  )
 fi
 
 # Print "SECTION <idx> <key>" markers followed by that section's normalized
@@ -105,6 +204,77 @@ sections_of() {
 }
 
 status=0
+
+# A Chinese side without its English anchor is invisible to a scope walk over
+# `*.md`, so it gets its own pass.
+while IFS= read -r zh_path; do
+  [[ -f ${zh_path%.zh.md}.md ]] && continue
+  printf 'verify-translation-pair: %s: Chinese side without an English anchor\n' "$zh_path" >&2
+  status=1
+done < <(git ls-files '*.zh.md' | while IFS= read -r path; do
+  in_scope "$path" || continue
+  pairing_excluded "$path" && continue
+  printf '%s\n' "$path"
+done | sort)
+
+# links_of <file>: `line<TAB>target` for every relative Markdown link outside
+# fenced code. The language switcher is the one line allowed to cross locales.
+links_of() {
+  awk '
+    /^```/ { fence = !fence; next }
+    fence { next }
+    /^(English \| \[中文\]\([^)]*\)|\[English\]\([^)]*\) \| 中文)$/ { next }
+    {
+      line = $0
+      while (match(line, /\]\([^)]*\)/)) {
+        target = substr(line, RSTART + 2, RLENGTH - 3)
+        gsub(/^ +| +$/, "", target)
+        sub(/ .*$/, "", target)
+        if (target != "") print NR "\t" target
+        line = substr(line, RSTART + RLENGTH)
+      }
+    }
+  ' "$1"
+}
+
+# check_locale_links <en> <zh>: a Chinese side links the Chinese sibling when
+# the pair has one, and an English side never links the Chinese one.
+check_locale_links() {
+  local en=$1 zh=$2 src dir line target path want
+  for src in "$en" "$zh"; do
+    dir=$(dirname "$src")
+    while IFS=$'\t' read -r line target; do
+      [[ -z $target ]] && continue
+      case "$target" in
+        *://* | mailto:* | '#'* | /*) continue ;;
+      esac
+      path=${target%%#*}
+      [[ -z $path ]] && continue
+      case "$src" in
+        *.zh.md)
+          case "$path" in
+            *.zh.md) continue ;;
+            *.md) ;;
+            *) continue ;;
+          esac
+          [[ -e "$dir/${path%.md}.zh.md" ]] || continue
+          want=${path%.md}.zh.md
+          ;;
+        *)
+          case "$path" in
+            *.zh.md) ;;
+            *) continue ;;
+          esac
+          want=${path%.zh.md}.md
+          ;;
+      esac
+      printf 'verify-translation-pair: %s:%s: link target %s uses the wrong locale; expected %s\n' \
+        "$src" "$line" "$target" "$want" >&2
+      status=1
+    done < <(links_of "$src")
+  done
+}
+
 # index_copy <path>: copy the staged blob for path into $tmpdir under its own
 # basename (section keys derive from the filename). Returns 1 when the index
 # has no such path.
@@ -118,6 +288,13 @@ for doc in "${docs[@]}"; do
   en="$doc"
   zh="${doc%.md}.zh.md"
   record="${doc%.md}.i18n.yaml"
+
+  # Link locale is resolved against real paths, so it reads the worktree copy
+  # even under --cached; a staged tree that disagrees with the worktree is the
+  # commit's own problem, not this check's.
+  if [[ -f $en && -f $zh ]]; then
+    check_locale_links "$en" "$zh"
+  fi
 
   missing=0
   if (( cached )); then
@@ -217,4 +394,4 @@ for doc in "${docs[@]}"; do
   status=$((status + doc_status))
 done
 
-exit "$status"
+exit $((status != 0))

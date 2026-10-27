@@ -1,0 +1,11 @@
+# Bilingual-pair consistency record for README.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write README.md
+/readme:
+  en: 5c2d99edb5c856ed
+  zh: 73e966b25062fe86
+/readme/development:
+  en: b1bc978cb9929025
+  zh: e815c7259357287e

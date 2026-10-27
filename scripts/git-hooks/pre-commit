@@ -19,23 +19,8 @@ if [[ -n $go_files ]]; then
   go vet ./...
 fi
 
-pair_docs=$(
-  printf '%s\n' "$staged" \
-    | { grep -E '\.(md|zh\.md|i18n\.yaml)$' || true; } \
-    | sed -e 's/\.zh\.md$/.md/' -e 's/\.i18n\.yaml$/.md/' \
-    | sort -u \
-    | while IFS= read -r doc; do
-        record="${doc%.md}.i18n.yaml"
-        if git cat-file -e ":$record" 2>/dev/null || [[ -f $record ]]; then
-          printf '%s\n' "$doc"
-        fi
-      done
-)
-if [[ -n $pair_docs ]]; then
-  # Word splitting is intended: one document path per word.
-  bash scripts/verify-translation-pair.sh --cached $pair_docs
-fi
-
-if printf '%s\n' "$staged" | grep -qE '\.md$'; then
+if [[ -n $staged ]] && printf '%s\n' "$staged" | grep -qE '\.md$'; then
+  bash scripts/verify-agent-notes.sh
+  bash scripts/verify-translation-pair.sh --staged
   bash scripts/verify-md-links.sh
 fi

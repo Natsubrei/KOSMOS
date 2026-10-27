@@ -1,5 +1,7 @@
 # KOSMOS
 
+English | [中文](README.zh.md)
+
 Client-server tool for diagnosing anomalies on Linux virtual machines and hosts.
 
 ## Development

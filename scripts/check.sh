@@ -13,6 +13,7 @@ fi
 go vet ./...
 go test -race ./...
 bash scripts/check-layering.sh
+bash scripts/verify-agent-notes.sh
 bash scripts/verify-translation-pair.sh
 bash scripts/verify-md-links.sh
 

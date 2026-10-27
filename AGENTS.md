@@ -12,7 +12,7 @@ KOSMOS is a client-server tool for diagnosing anomalies on Linux virtual machine
 
 ## Development
 
-- `scripts/check.sh` is the full gate — formatting, vet, tests, layering, bilingual pairs, Markdown links — and is what CI runs. The pre-commit hook checks only what matches the staged files; pre-push runs the tests.
+- `scripts/check.sh` is the full gate — formatting, vet, tests, layering, Agent Note structure, bilingual pairs, Markdown links — and is what CI runs. The pre-commit hook checks only what matches the staged files; pre-push runs the tests.
 - Evidence does not survive a history rewrite: after a rebase or forced push, re-run the affected checks before treating the branch as verified.
 - Push rewritten branches with `--force-with-lease` and abort on remote movement; raw `--force` is forbidden.
 - Report only the commands actually run; never claim a check that was not executed.
@@ -23,7 +23,7 @@ KOSMOS is a client-server tool for diagnosing anomalies on Linux virtual machine
 
 ## Language
 
-English: this file, code comments, commit messages. Human-facing docs — the glossary and Agent Notes included — are bilingual pairs, `foo.md` (English) + `foo.zh.md` (Chinese); either side may be authored, sync the counterpart minimally in the same change. Pairs are gated by `scripts/verify-translation-pair.sh`: after editing either side, bring the other along and re-record the `<doc>.i18n.yaml` sidecar. Relative Markdown links are gated by `scripts/verify-md-links.sh`. How domain terms render in each language is `docs/i18n/terminology.md` (bilingual by construction, not a pair). How to translate a pair is `docs/i18n/translation-rules.md`. Load both before editing a `.zh.md` file. The pairing gate does not check terminology, punctuation, or spacing; do not add scanners for those. Chinese prose uses full-width punctuation; inline code, URLs, and identifiers keep ASCII; put a half-width space between Chinese text and a Latin word or numeral.
+English: this file, code comments, commit messages. Human-facing docs — the glossary, the architecture map, Agent Notes included — are bilingual pairs, `foo.md` (English) + `foo.zh.md` (Chinese); either side may be authored, sync the counterpart minimally in the same change. The corpus is `README.md`, `docs/`, `.agents/notes/`, and `test/`: a document there must be a complete pair — `foo.zh.md` plus its `foo.i18n.yaml` record — and the deliberate exceptions are listed in `scripts/pairing-exclusions.txt`. `scripts/check.sh` runs the gates; `scripts/verify-agent-notes.sh` owns the Agent Note tree. How to write the other side is `docs/i18n/translation-rules.md`; how a domain term renders is `docs/i18n/terminology.md` (bilingual by construction, not a pair). Load both before editing a `.zh.md` file. The gates do not check terminology, punctuation, or spacing; do not add scanners for those. Chinese prose uses full-width punctuation; inline code, URLs, and identifiers keep ASCII; put a half-width space between Chinese text and a Latin word or numeral.
 
 ## Deployment and testing
 
