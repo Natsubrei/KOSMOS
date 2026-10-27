@@ -12,7 +12,9 @@ KOSMOS 必须持续吸收新的采集目标。若记录总线为每个域写分�
 
 扩展单元是**域包**：一个自包含的编译期包，实现一个采集域——eBPF C 程序、map schema、解码器、Record 类型、可选的富集器——拥有自己的 maps 与 ring buffer，注册进进程内注册表。agent 的记录总线与 server 侧同构的接收总线保持**零域分支**：新增一个域不改这些包的任何一行。跨域共享只经 `contracts/<domain>` 纯类型包；禁止 import 兄弟域，由 `scripts/check-layering.sh` 基于 `go list -deps` 强制。
 
-单个 Go module（`github.com/natsubrei/kosmos`）：`cmd/agent`、`cmd/server`、`internal/{agent,server}`、`contracts/<domain>`。v1 激活是本地配置驱动 Start/Stop；由 server 指令激活时只换驱动，不换这套架构。
+单个 Go module（`github.com/natsubrei/kosmos`）：`cmd/agent`、`cmd/server`、`internal/{agent,server}`、`contracts/<domain>`。跑哪些域由 server 经控制会话下令；Start/Stop 仍是 Runtime handle。只换驱动，不换这套架构。
+
+[数据通道与控制会话](2026-10-27-agent-server-protocol.zh.md)
 
 非目标：不做运行时插件加载；不做配置 DSL 或动态 schema 注册（Record 就是 Go 类型）；不做每域并发框架（Runtime handle 统一管生命周期、排空调度与统计）；不做单机内跨域聚合；不做插件市场、签名与版本协商。
 

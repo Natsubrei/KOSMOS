@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for .agents/notes/implemented/architecture/2026-10-27-agent-server-protocol.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/implemented/architecture/2026-10-27-agent-server-protocol.md
+/2026-10-27-agent-server-protocol:
+  en: 7334f2f4ec156c87
+  zh: b22bc6b7796d9e84
+/2026-10-27-agent-server-protocol/problem:
+  en: b564b3a919f34aba
+  zh: 5b4f1096872baed1
+/2026-10-27-agent-server-protocol/decision:
+  en: 2c0e920dedf68f60
+  zh: 7fe122f14300272a
+/2026-10-27-agent-server-protocol/alternatives-considered:
+  en: 7bd9d5ac124c6b35
+  zh: f7f79292215ac2ad
+/2026-10-27-agent-server-protocol/consequences:
+  en: 18592fd1e6512848
+  zh: ebb8fee52e3beee9

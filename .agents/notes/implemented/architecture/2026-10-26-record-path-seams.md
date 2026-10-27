@@ -64,6 +64,8 @@ curl against `GET /records` accepts the slice. JSON will not carry 10⁵
 Records/s/host: change `upload` and `httpapi`, not the record bus, runtime kit, or contracts.
 Memory store does not survive restart. A Record also carries `host`
 ([in-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md));
-the JSON array gains that field with the diagnosis loop. Reconnection is "drop on HTTP
-failure"; backpressure is the 64-slot buffer. Server-instructed collection
-activation is not this path.
+the JSON array gains that field with the diagnosis loop. Reconnection of
+`POST /records` is drop on HTTP failure; backpressure is the 64-slot buffer.
+Collection activation is the control session, not this path.
+
+[Agent–server protocol: data path and control session](2026-10-27-agent-server-protocol.md)

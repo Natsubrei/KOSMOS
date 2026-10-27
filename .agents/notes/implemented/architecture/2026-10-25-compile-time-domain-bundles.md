@@ -24,9 +24,11 @@ those packages. Cross-domain sharing goes only through
 enforced by `scripts/check-layering.sh` over `go list -deps`.
 
 One Go module (`github.com/natsubrei/kosmos`): `cmd/agent`, `cmd/server`,
-`internal/{agent,server}`, `contracts/<domain>`. v1 activation is local config
-driving Start/Stop; server-instructed activation swaps the driver, not this
-architecture.
+`internal/{agent,server}`, `contracts/<domain>`. Which domains run is
+server-instructed over the control session; Start/Stop stays the Runtime
+handle. That swaps the driver, not this architecture.
+
+[Agent–server protocol: data path and control session](2026-10-27-agent-server-protocol.md)
 
 Non-goals: no runtime plugin loading; no config DSL or dynamic schema registry
 (records are Go types); no per-domain concurrency framework (the Runtime handle
