@@ -1,6 +1,6 @@
 # Agent Note: In-memory store and the ingest/diagnosis boundary
 
-Status: implemented
+Status: proposed
 
 [English](2026-10-27-storage-async-boundary.md) | 中文
 
@@ -8,7 +8,7 @@ Status: implemented
 
 诊断需要按 host 把 Record 切进已关闭的 Window，并且 Report 不必去接收存储做 join 仍可读。接收路径已经把 Record 放在进程内存里。在一台测试机还没跑出量之前，上数据库、第二套消费者模型、或多段处理 pipeline，都是多出来的面。
 
-## 决策
+## 提案
 
 Record、Report、以及已诊断区间的集合都活在 server 进程里。重启即丢。这次不上 PostgreSQL、SQLite、Timescale，也不留空的存储适配器。没有滚动删除：留存等于进程寿命。
 
@@ -33,6 +33,10 @@ Record、Report、以及已诊断区间的集合都活在 server 进程里。重
 - **从 TCP 对端推断 host**：否决——NAT 会指向错误的机器。
 - **把这条路径叫 pipeline**：否决——总线是扇出；诊断是后面一个消费者，不是一串阶段。
 
-## 后果
+## 验收标准
 
-ticker 间隔和列出 Report 的 HTTP 路径，随第一个 Analyzer 落地。`GET /records` 仍是接收和列出。Record 的 JSON 数组带 `host`。agent 怎么选定该字符串是 `internal/agent/hostid`；总线只运结果。Conclusion 怎么推导仍不是本笔记。
+`POST /records` 只做追加。一条进程内 ticker 切最早一扇已关闭且尚未诊断的 Window，并跑 Analyzer。空窗也标成已诊断。Record、Report、已诊断集合都在进程内存里。重启即丢。
+
+## 风险
+
+ticker 间隔和列出 Report 的 HTTP 路径，随第一个 Analyzer 落地。`GET /records` 仍是接收和列出。Conclusion 怎么推导仍不是本笔记。SQLite 等骨架跑出量再说。

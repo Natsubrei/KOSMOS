@@ -1,6 +1,6 @@
 # Agent Note: In-memory store and the ingest/diagnosis boundary
 
-Status: implemented
+Status: proposed
 
 English | [中文](2026-10-27-storage-async-boundary.zh.md)
 
@@ -12,7 +12,7 @@ keeps Records in process memory. A database, a second consumer model, or a
 staged processing pipeline would add surface before a single test guest has
 produced volume.
 
-## Decision
+## Proposal
 
 Records, Reports, and the set of diagnosed intervals live in the server
 process. Restart loses them. There is no PostgreSQL, SQLite, or Timescale
@@ -63,10 +63,16 @@ single consumer. It is not a multi-stage pipeline.
 - **Call the path a pipeline:** rejected — the bus fans out; diagnosis
   is one later consumer, not a chain of stages.
 
-## Consequences
+## Acceptance criteria
+
+`POST /records` only appends. One in-process ticker cuts the oldest closed
+undiagnosed Window and runs Analyzers. Empty windows are still marked
+diagnosed. Records, Reports, and the diagnosed set live in process memory.
+Restart loses them.
+
+## Risks
 
 The ticker period and HTTP paths that list Reports land with the first
-Analyzer. `GET /records` remains receive-and-list. The JSON array of
-Records carries `host`. How the agent chooses that string is
-`internal/agent/hostid`; the bus only carries the result. How Conclusions
-are derived is still outside this note.
+Analyzer. `GET /records` remains receive-and-list. How Conclusions are
+derived is still outside this note. SQLite waits on volume from the
+skeleton.

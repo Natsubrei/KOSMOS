@@ -1,6 +1,6 @@
 # Agent Note: CPU-scheduling collection constraints
 
-Status: implemented
+Status: proposed
 
 English | [中文](2026-10-25-cpu-sched-collection-constraints.zh.md)
 
@@ -12,7 +12,7 @@ host, more with run-queue reconstruction — so a per-event userspace path canno
 meet a small CPU and memory footprint. Target kernels also vary; below some
 version the probe set and BTF story fall apart.
 
-## Decision
+## Proposal
 
 - **Baseline kernel: 5.8** (ring buffer + fentry/BTF tracing + sysfs BTF
   together). **Floor: 4.9** (perf-event attach + perf event array, no fentry,
@@ -33,8 +33,14 @@ version the probe set and BTF story fall apart.
   ring buffer, fentry/BTF tracing, and sysfs BTF coincide; older kernels use
   the floor path, they are not the default.
 
-## Consequences
+## Acceptance criteria
 
-Probes and the protocol must assume reduced records, not raw tracepoints.
-Hosts on 4.9–5.7 run a degraded attach path. Steal time is not a
-tracepoint-shaped record.
+A 5.8+ guest emits in-kernel-aggregated CPU Records, not one userspace
+event per `sched_switch`. Volume stays inside 10⁵ steady / 10⁶ burst
+Records/s/host. Kernels below 4.9 are unsupported.
+
+## Risks
+
+Forwarding every `sched_switch` blows the footprint. The 4.9–5.7 floor is
+a second attach path to maintain. Steal time is not a tracepoint-shaped
+Record.

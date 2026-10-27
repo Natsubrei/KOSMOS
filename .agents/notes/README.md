@@ -12,8 +12,9 @@ message, or existing note already owns — non-obvious causes, process rules,
 rejected alternatives worth remembering. Mechanical changes are exempt. A
 change that invalidates a note updates it in the same change.
 
-In-progress work stays in `issues/`. Do not pre-write a `proposed/` note for an
-open ticket: a note starts when the decision exists.
+When the decision exists and the code does not, the note starts in
+`proposed/`. Move it to `implemented/` in the same change that ships the
+code. Do not write a note before the decision exists.
 
 ## Layout and status
 
@@ -22,9 +23,14 @@ open ticket: a note starts when the decision exists.
 The date is when the topic was first proposed. Moving a note between lifecycle
 folders does not rename it.
 
-- **proposed** — under discussion; may hold plans and "should".
-- **implemented** — shipped reality, present tense; no spec-speak, no
-  migration plans, no acceptance checklists.
+- **proposed** — decided, not yet in the tree or only partly built. Future
+  tense is allowed. `## Proposal` is the intended shape; `## Acceptance criteria`
+  is what observable state means done; `## Risks` is what can go wrong and what
+  the change knowingly gives up.
+- **implemented** — shipped reality, present tense. Kept current with paths,
+  symbols, and defaults in the same change that alters them. No spec-speak, no
+  migration plans, no acceptance checklists. Reversing the decision is a new
+  note plus a cross-link, not an edit of this file.
 - **rejected** — considered and declined, with the reason.
 
 | Class | What it covers |
@@ -44,8 +50,10 @@ folders does not rename it.
 Status: <proposed|implemented|rejected — <why>>
 ```
 
-Implemented notes then use `## Problem`, `## Decision`, `## Alternatives
+Implemented notes use `## Problem`, `## Decision`, `## Alternatives
 considered`, `## Consequences`. Proposed notes use `## Proposal` instead of
-`## Decision`, plus `## Acceptance criteria` and `## Risks`. Every note records
-each genuine alternative and why it lost. Notes are bilingual pairs under
-`scripts/verify-translation-pair.sh`.
+`## Decision`, plus `## Acceptance criteria` and `## Risks`. Moving
+`proposed/` → `implemented/` rewrites Proposal into present-tense Decision and
+folds Acceptance and Risks into Consequences, in that same change. Every note
+records each genuine alternative and why it lost. Notes are bilingual pairs
+under `scripts/verify-translation-pair.sh`.

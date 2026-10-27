@@ -1,6 +1,6 @@
 # Agent Note: Agent–server protocol: data path and control session
 
-Status: implemented
+Status: proposed
 
 English | [中文](2026-10-27-agent-server-protocol.zh.md)
 
@@ -12,7 +12,7 @@ the same as collecting it: running every bundle wastes CPU. Without a liveness
 signal, a quiet host and a dead agent look the same. The data transport will
 change (gRPC is a candidate); the record bus and domain bundles must not.
 
-## Decision
+## Proposal
 
 Two channels, both agent-outbound, both HTTP in this cut, no TLS.
 
@@ -59,15 +59,20 @@ gRPC. A later transport replaces `internal/agent/upload`,
 - **gRPC in this cut:** rejected — the human GET is JSON; the seam is the
   subscribers and receivers, not a second stack now.
 
-## Consequences
+## Acceptance criteria
 
-The walking skeleton implements session framing, keepalive interval, and the
-auto `{cpu}` snapshot. `GET /records` stays receive-and-list. Collection
-Start/Stop stays the Runtime handle; the session only decides which handles
-run.
+The agent dials a control session; the server holds one handle per `host`
+and sends domain snapshots. Application keepalive plus a 60-second stop
+binds liveness without Records. `POST /records` stays the data path.
 
-[Record-path seams](2026-10-26-record-path-seams.md)
+## Risks
+
+Session framing, keepalive interval, and the auto `{cpu}` snapshot land with
+the walking skeleton. Collection Start/Stop stays the Runtime handle. TLS
+and enrollment are a later auth model.
+
+[Record-path seams](../../implemented/architecture/2026-10-26-record-path-seams.md)
 
 [In-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md)
 
-[Compile-time domain bundles](2026-10-25-compile-time-domain-bundles.md)
+[Compile-time domain bundles](../../implemented/architecture/2026-10-25-compile-time-domain-bundles.md)

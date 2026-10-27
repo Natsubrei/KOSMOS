@@ -1,6 +1,6 @@
 # Agent Note: Report and evidence-chain data model
 
-Status: implemented
+Status: proposed
 
 English | [中文](2026-10-26-report-evidence-model.zh.md)
 
@@ -10,7 +10,7 @@ A human must audit why a diagnosis follows. Surveyed eBPF products stop at
 telemetry, LLM prose, or closed causal engines; none ship a deterministic
 evidence chain. Without that document, `GET /records` cannot become a report.
 
-## Decision
+## Proposal
 
 A **Report** is the auditable document: one **Conclusion**, the **Evidence**
 it rests on, and the **Window** it covers. It is an immutable value
@@ -70,9 +70,15 @@ A Report always has a Window.
 - **Severity or confidence on the Conclusion:** rejected for this model —
   stance and Evidence are enough to audit; ranking is not.
 
-## Consequences
+## Acceptance criteria
 
-How Conclusions are derived and where bounds are configured sit outside this note. The Predicate records the comparison that
-fired; Missing source is the slot for a required source that was absent. The first Analyzer introduces Report
-types on the server, outside `contracts/`. `GET /records` remains receive-and-list. Severity,
-a problem-card aggregator, and HTTP paths for Reports are not this note.
+An Analyzer turns one Window's Records into zero or more complete Reports.
+A human can GET a Report JSON and follow Conclusion → Evidence → Record
+snapshot or Missing source without joining live ingest. Report types live
+on the server, outside `contracts/`.
+
+## Risks
+
+How Conclusions are derived and where bounds are configured sit outside this
+note. `GET /records` remains receive-and-list. Severity, a problem-card
+aggregator, and HTTP paths for Reports are not this note.

@@ -1,6 +1,6 @@
 # Agent Note: Time-window cut on one host
 
-Status: implemented
+Status: proposed
 
 [English](2026-10-26-time-window-semantics.md) | 中文
 
@@ -8,7 +8,7 @@ Status: implemented
 
 Report 必须覆盖一扇 Window，Evidence 也可以把该窗当作 id、start、end 快照来依据。若没有统一的切法，每个 Analyzer 会自选区间，两份 Report 就不能表示同一段时间。
 
-## 决策
+## 提案
 
 **Window** 是一台 host 上的 id、host、start、end。`start` 与 `end` 和 `Record.at` 同一墙钟（发出时盖上）；`end` 不含。由 server 上不含域知识的代码切窗。agent（采集端）只发 Record。Analyzer 吃已经切好的一扇窗，不改 `start` 或 `end`。
 
@@ -30,10 +30,12 @@ Record 不带 window id。诊断要跑时才切：切窗代码接受一台 host 
 - **按域或按 host 各设长度**：否决——切窗代码不含域知识。
 - **Evidence 引用相邻 Window**：否决——那是第二扇窗的 Record，和「一窗进」冲突。
 
-## 后果
+## 验收标准
 
-切窗怎么跑见下。区间关闭之后才到的 Record 仍存储，不改已有 Report。
+不含域知识的 server 代码在诊断时按 host 切 10 秒 Unix-UTC 窗。Analyzer 拿到的是已切好的一扇窗，不改 `start` 或 `end`。迟到的 Record 不改已有 Report。`GET /records` 仍是接收和列出。
+
+## 风险
+
+切窗怎么跑见存储笔记。Window 类型随第一个 Analyzer 落地；本笔记不引入它们。10 秒这个常量可以改，Window 形状不用改。
 
 [内存存储与接收/诊断边界](2026-10-27-storage-async-boundary.zh.md)
-
-10 秒这个常量可以改，Window 形状不用改。Window 类型随第一个 Analyzer 在 server 上落地；本笔记不引入它们。`GET /records` 仍是接收和列出。

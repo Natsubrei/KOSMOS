@@ -1,6 +1,6 @@
 # Agent Note: CPU-scheduling collection constraints
 
-Status: implemented
+Status: proposed
 
 [English](2026-10-25-cpu-sched-collection-constraints.md) | 中文
 
@@ -8,7 +8,7 @@ Status: implemented
 
 CPU 调度诊断需要在真实主机上观察内核侧信号。`sched_switch` 在每次上下文切换时触发——繁忙的 30+ 核主机上约 5×10⁵/s，重建运行队列还会再乘 1.5–2 倍——因此把每条事件送进用户态无法满足很小的 CPU 与内存占用。目标内核版本也参差不齐；低于某一版本后，探针集合与 BTF 路径会散掉。
 
-## 决策
+## 提案
 
 - **基线内核：5.8**（ring buffer、fentry/BTF tracing、sysfs BTF 同时具备）。**地板：4.9**（perf-event 附着 + perf event array，无 fentry，可能需要 BTFHub）。低于 4.9 不支持。
 - agent 在内核内聚合（直方图 / 阈值过滤）。协议预算为每主机每秒 10⁵ 稳态 / 10⁶ 突发事件。
@@ -21,6 +21,10 @@ CPU 调度诊断需要在真实主机上观察内核侧信号。`sched_switch` �
 - **地板低于 4.9**：否决——没有我们愿意维护的附着路径。
 - **用 perf buffer 当基线**：否决——5.8 是 ring buffer、fentry/BTF tracing 与 sysfs BTF 第一次同时出现的内核；更老的内核走地板路径，不是默认。
 
-## 后果
+## 验收标准
 
-探针与协议必须按压缩后的 Record 来设计，而不是原始 tracepoint。4.9–5.7 的主机走降级附着路径。steal time 不是 tracepoint 形态的 Record。
+5.8 及以上的 guest 发出内核内聚合后的 CPU Record，不是每条 `sched_switch` 进一次用户态。体量落在每主机每秒 10⁵ 稳态 / 10⁶ 突发以内。低于 4.9 的内核不支持。
+
+## 风险
+
+把每条 `sched_switch` 转发会打爆占用。4.9–5.7 的地板是第二条要维护的附着路径。steal time 不是 tracepoint 形态的 Record。

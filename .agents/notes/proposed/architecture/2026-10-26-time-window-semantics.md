@@ -1,6 +1,6 @@
 # Agent Note: Time-window cut on one host
 
-Status: implemented
+Status: proposed
 
 English | [中文](2026-10-26-time-window-semantics.zh.md)
 
@@ -10,7 +10,7 @@ A Report must cover a Window, and Evidence may rest on that Window as a
 snapshot `{id, start, end}`. Without a single cut, each Analyzer would pick
 its own interval, and two Reports could not mean the same span.
 
-## Decision
+## Proposal
 
 A **Window** is `{id, host, start, end}` on one host. `start` and `end` use
 the same wall clock as `Record.at` (stamped at emit); `end` is exclusive.
@@ -57,10 +57,17 @@ neighbouring intervals. The Analyzer still sees only this Window's Records.
 - **Cite a neighbouring Window from Evidence:** rejected — that is a
   second Window of Records, against one Window in.
 
-## Consequences
+## Acceptance criteria
 
-The cutter runs as in
-[In-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md).
-Late Records after a closed interval are stored and do not rewrite Reports. The 10-second constant can change without changing the Window
-shape. Window types land on the server with the first Analyzer; this note
-does not add them. `GET /records` remains receive-and-list.
+Domain-free server code cuts 10-second Unix-UTC Windows per host at diagnosis.
+An Analyzer receives one already-cut Window and does not change `start` or
+`end`. Late Records do not rewrite Reports. `GET /records` remains
+receive-and-list.
+
+## Risks
+
+The cutter runs as in the storage note. Window types land with the first
+Analyzer; this note does not add them. The 10-second constant can change
+without changing the Window shape.
+
+[In-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md)

@@ -1,0 +1,23 @@
+# Bilingual-pair consistency record for .agents/notes/proposed/architecture/2026-10-26-time-window-semantics.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/proposed/architecture/2026-10-26-time-window-semantics.md
+/2026-10-26-time-window-semantics:
+  en: 0fc40abd43610f90
+  zh: ded0907efab6c3a7
+/2026-10-26-time-window-semantics/problem:
+  en: f9138c7be819637b
+  zh: 99220ce32d444688
+/2026-10-26-time-window-semantics/proposal:
+  en: 642076d6b82b6f34
+  zh: d5a81ddf4722f8f3
+/2026-10-26-time-window-semantics/alternatives-considered:
+  en: 527a5750732dd729
+  zh: 80e627fa9caba9e6
+/2026-10-26-time-window-semantics/acceptance-criteria:
+  en: a43b9bfa1258f78f
+  zh: 07a240431ac8b460
+/2026-10-26-time-window-semantics/risks:
+  en: dd20cdab04cb1bfb
+  zh: 6bebcdc59333764c

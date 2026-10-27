@@ -55,7 +55,7 @@ Restarting the server loses the list. Wiring `Subscribe(cpu)` lives in
 - **PostgreSQL (or SQLite) in this slice:** rejected — Memory behind
   append/list is enough; a vacant adapter is debt.
 - **GET returns an evidence-chain report:** rejected for this slice — the
-  model is the [report and evidence-chain](2026-10-26-report-evidence-model.md)
+  model is the [report and evidence-chain](../../proposed/architecture/2026-10-26-report-evidence-model.md)
   note; `GET /records` remains receive-and-list.
 
 ## Consequences
@@ -63,9 +63,9 @@ Restarting the server loses the list. Wiring `Subscribe(cpu)` lives in
 curl against `GET /records` accepts the slice. JSON will not carry 10⁵
 Records/s/host: change `upload` and `httpapi`, not the record bus, runtime kit, or contracts.
 Memory store does not survive restart. A Record also carries `host`
-([in-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md));
+([in-memory store and the ingest/diagnosis boundary](../../proposed/architecture/2026-10-27-storage-async-boundary.md));
 the JSON array gains that field with the diagnosis loop. Reconnection of
 `POST /records` is drop on HTTP failure; backpressure is the 64-slot buffer.
 Collection activation is the control session, not this path.
 
-[Agent–server protocol: data path and control session](2026-10-27-agent-server-protocol.md)
+[Agent–server protocol: data path and control session](../../proposed/architecture/2026-10-27-agent-server-protocol.md)
