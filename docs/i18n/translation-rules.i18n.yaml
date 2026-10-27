@@ -1,0 +1,26 @@
+# Bilingual-pair consistency record for docs/i18n/translation-rules.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write docs/i18n/translation-rules.md
+/translation-rules:
+  en: cf0a2652d91174eb
+  zh: f7f6f520d24b897c
+/translation-rules/faithfulness:
+  en: 174b9901e14ec076
+  zh: 7aff6ee4bb920e6c
+/translation-rules/voice:
+  en: b57afda4ef28b121
+  zh: 49b436ed6ce32f98
+/translation-rules/structure:
+  en: 1b07bc3151dfcb23
+  zh: d02372114d0dcede
+/translation-rules/terminology:
+  en: 6d1c019290265993
+  zh: 61ac848322b166af
+/translation-rules/typography:
+  en: c8dbcf9bb1fc58a1
+  zh: 8fcda66671d0bedb
+/translation-rules/quality:
+  en: 181ab6968e69a74d
+  zh: 9ce955104bb461d3

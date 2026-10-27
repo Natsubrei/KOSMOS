@@ -2,9 +2,11 @@
 
 [English](glossary.md) | 中文
 
-KOSMOS 诊断 Linux 虚拟机与物理主机上的异常：agent 经 eBPF 在内核内取证，中心服务器执行诊断。本术语表约定项目自身的词汇。这些词在各语言里怎么写见译法表。
+KOSMOS 诊断 Linux 虚拟机与物理主机上的异常：agent 经 eBPF 在内核内取证，中心服务器执行诊断。本术语表约定项目自身的词汇。这些词在各语言里怎么写见译法表。怎么翻译一对文档见翻译规则。
 
 [terminology.md](i18n/terminology.md)
+
+[translation-rules.zh.md](i18n/translation-rules.zh.md)
 
 ## 词汇
 
@@ -45,7 +47,7 @@ agent 与 server 共享的、按域划分的纯类型包（`contracts/<domain>`�
 _避免使用_：API、schema（这两个词留给线上协议）
 
 **Record**：
-域包发布的一条观察：载荷、所属域、发出时由 runtime 盖上的墙钟时间。一次原始的内核发生（如一条 sched_switch）是内核事件；Record 是内核内聚合从事件中产出的东西。
+域包发布的一条观察：host、载荷、所属域、发出时由 runtime 盖上的墙钟时间。host 是被采集的那台机器。一次原始的内核发生（如一条 sched_switch）是内核事件；Record 是内核内聚合从事件中产出的东西。
 _避免使用_：event（留给内核事件）、message
 
 **Runtime kit**：

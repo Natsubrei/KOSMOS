@@ -62,6 +62,8 @@ Restarting the server loses the list. Wiring `Subscribe(cpu)` lives in
 
 curl against `GET /records` accepts the slice. JSON will not carry 10⁵
 Records/s/host: change `upload` and `httpapi`, not the record bus, runtime kit, or contracts.
-Memory store does not survive restart. Reconnection is "drop on HTTP
+Memory store does not survive restart. A Record also carries `host`
+([in-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md));
+the JSON array gains that field with the diagnosis loop. Reconnection is "drop on HTTP
 failure"; backpressure is the 64-slot buffer. Server-instructed collection
 activation is not this path.

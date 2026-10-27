@@ -5,7 +5,8 @@ English | [中文](glossary.zh.md)
 KOSMOS diagnoses anomalies on Linux virtual machines and hosts: agents collect
 in-kernel evidence via eBPF; a central server runs the diagnosis. This glossary fixes
 the project's own vocabulary. How those words render in each language is
-[terminology.md](i18n/terminology.md).
+[terminology.md](i18n/terminology.md). How to translate a pair is
+[translation-rules.md](i18n/translation-rules.md).
 
 ## Language
 
@@ -57,8 +58,8 @@ types and constants, zero implementation.
 _Avoid_: API, schema (those name the wire protocol)
 
 **Record**:
-One observation a bundle publishes: payload, domain, and wall-clock time stamped at
-emit. A raw kernel occurrence (one sched_switch) is a kernel event; records are what
+One observation a bundle publishes: host, payload, domain, and wall-clock time stamped at
+emit. `host` is the machine it was collected on. A raw kernel occurrence (one sched_switch) is a kernel event; records are what
 the in-kernel aggregation produces from them.
 _Avoid_: event, message
 

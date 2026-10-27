@@ -59,8 +59,8 @@ neighbouring intervals. The Analyzer still sees only this Window's Records.
 
 ## Consequences
 
-The schedule that invokes the cutter (timer, request, watermark) is not
-this note. Records that arrive after an interval has closed are a storage
-question. The 10-second constant can change without changing the Window
+The cutter runs as in
+[In-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md).
+Late Records after a closed interval are stored and do not rewrite Reports. The 10-second constant can change without changing the Window
 shape. Window types land on the server with the first Analyzer; this note
 does not add them. `GET /records` remains receive-and-list.

@@ -10,38 +10,26 @@ Both sides of a pair and its sidecar move in the same change;
 
 ## Steps
 
-1. Load [docs/i18n/terminology.md](../../../docs/i18n/terminology.md). Every listed
+1. Load [docs/i18n/translation-rules.md](../../../docs/i18n/translation-rules.md)
+   and [docs/i18n/terminology.md](../../../docs/i18n/terminology.md). Every listed
    term follows its row and its 不要译作 prohibitions. A new term gets a row in
    the same change; do not invent a rendering inline. The pairing gate does not
-   check terminology; do not add a scanner for 不要译作 or first-use glosses.
+   check terminology, punctuation, or spacing; do not add scanners for those.
+   A green pairing hash does not prove translation quality.
 2. Edit both sides in one change. Sections pair positionally (same heading
    count, same order); keys come from the English headings, so the Chinese
-   side may translate its headings freely.
-3. Convert the Chinese side's punctuation at the byte level:
-
-   ```bash
-   perl -CSD -pi -e 'if (/\p{Han}/ && !/^\[/) { tr/\x{3a}\x{2c}\x{28}\x{29}\x{3b}/\x{ff1a}\x{ff0c}\x{ff08}\x{ff09}\x{ff1b}/ }' <doc>.zh.md
-   ```
-
-   The gate in step 5 reports whatever half-width punctuation next to Chinese
-   survives; do not verify with `grep` counts. A note's `# Agent Note:` title
-   and `Status:` line are an English header block, so their half-width colons
-   are correct.
-
-4. Re-record the sidecar: `bash scripts/verify-translation-pair.sh --write <doc>`.
-5. Corpus green: `bash scripts/verify-translation-pair.sh` (no arguments
-   verifies every pair that has a sidecar). A red line means step 2 or 3
-   missed a side — fix the pair, then re-record.
+   side may translate its headings freely. Follow translation-rules: full-width
+   punctuation in Chinese prose; ASCII inside backticks; one half-width space
+   between Chinese text and a Latin word or numeral.
+3. Re-record the sidecar: `bash scripts/verify-translation-pair.sh --write <doc>`.
+4. Corpus green: `bash scripts/verify-translation-pair.sh` (no arguments
+   verifies every pair that has a sidecar). A red line means step 2 missed a
+   side — fix the pair, then re-record.
 
 ## Reference
 
-- **Full-width trap**: full-width punctuation typed into tool parameters can
-  land on disk as half-width. Always set Chinese prose punctuation through the
-  byte conversion; rendered output proves nothing. CJK characters and `。、——`
-  arrive intact.
-- Chinese prose uses full-width `：（）；`. The gate skips headings, Markdown
-  link lines (starting with `[`), and inline code, so identifiers and URLs
-  stay ASCII there.
+- Do not run a whole-line punctuation converter over `.zh.md`; it rewrites
+  identifiers inside backticks.
 - **Drift meanings**: EN drift = English side changed since recording; ZH
   drift = Chinese side changed; stale record key = an English heading was
   renamed. All resolve the same way: bring both sides to the intended

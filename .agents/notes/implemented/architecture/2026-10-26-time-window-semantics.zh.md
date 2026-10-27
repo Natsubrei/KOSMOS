@@ -32,4 +32,8 @@ Record 不带 window id。诊断要跑时才切：切窗代码接受一台 host 
 
 ## 后果
 
-何时调用切窗（定时器、请求、水位）不是本笔记。区间关闭之后才到的 Record 是存储问题。10 秒这个常量可以改，Window 形状不用改。Window 类型随第一个 Analyzer 在 server 上落地；本笔记不引入它们。`GET /records` 仍是接收和列出。
+切窗怎么跑见下。区间关闭之后才到的 Record 仍存储，不改已有 Report。
+
+[内存存储与接收/诊断边界](2026-10-27-storage-async-boundary.md)
+
+10 秒这个常量可以改，Window 形状不用改。Window 类型随第一个 Analyzer 在 server 上落地；本笔记不引入它们。`GET /records` 仍是接收和列出。

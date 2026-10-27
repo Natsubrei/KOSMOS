@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for .agents/notes/implemented/architecture/2026-10-27-storage-async-boundary.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/implemented/architecture/2026-10-27-storage-async-boundary.md
+/2026-10-27-storage-async-boundary:
+  en: 881fb9d73c11cb52
+  zh: e22fdfdb60059e0f
+/2026-10-27-storage-async-boundary/problem:
+  en: ad33cf6569e1e6f3
+  zh: d986b4ed41c34f86
+/2026-10-27-storage-async-boundary/decision:
+  en: ff9f7fde7aa4545c
+  zh: 5c346ce3e20cdfdb
+/2026-10-27-storage-async-boundary/alternatives-considered:
+  en: 91cdcf2aaac0dc93
+  zh: e70a91c8d93c282e
+/2026-10-27-storage-async-boundary/consequences:
+  en: b3de88cf8c6858e3
+  zh: 71816192534850e2

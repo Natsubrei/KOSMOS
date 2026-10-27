@@ -10,10 +10,8 @@
 # --cached reads both sides and the record from the index, so an unstaged edit
 # cannot pass a commit.
 # Sections pair positionally; keys come from the English headings, so
-# translated Chinese headings do not break the record. Translation quality
-# is review's job. The Chinese side uses full-width punctuation outside its
-# English header block and link lines; half-width punctuation next to Chinese
-# is rejected before any record is written.
+# translated Chinese headings do not break the record. Translation quality,
+# terminology, and punctuation are review's job; this script does not scan them.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -106,26 +104,6 @@ sections_of() {
   if (( cur_idx >= 0 )); then out_h[cur_idx]=$(hash_lines buf); fi
 }
 
-# half_width_punct <file>: print each half-width ,:;() adjacent to Chinese in
-# prose. Headings, link lines, and inline code stay ASCII on purpose, so they
-# are skipped. Exit 1 when any is found.
-half_width_punct() {
-  perl -CSD -ne '
-    BEGIN { $fence = 0; $found = 0 }
-    if (/^```/) { $fence = !$fence; next }
-    next if $fence;
-    s/`[^`]*`//g;
-    next if /^\s*#/;
-    next if /^\s*\[/;
-    while (/(?:(\p{Han})([,:;()])|([,:;()])(\p{Han}))/g) {
-      my $pair = defined $1 ? "$1$2" : "$3$4";
-      print "half-width punctuation next to Chinese: $ARGV:$.: $pair\n";
-      $found = 1;
-    }
-    END { exit($found ? 1 : 0) }
-  ' "$1"
-}
-
 status=0
 # index_copy <path>: copy the staged blob for path into $tmpdir under its own
 # basename (section keys derive from the filename). Returns 1 when the index
@@ -162,13 +140,6 @@ for doc in "${docs[@]}"; do
     done
   fi
   if (( missing )); then
-    status=1
-    continue
-  fi
-
-  if ! punct=$(half_width_punct "$zh"); then
-    if (( cached )); then punct=${punct//$tmpdir\//}; fi
-    printf 'verify-translation-pair: %s:\n%s\n' "$doc" "$punct" >&2
     status=1
     continue
   fi
