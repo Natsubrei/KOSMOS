@@ -20,7 +20,7 @@ Conclusion 至少依据一条 Evidence。没有独立的理由字段。Evidence 
 
 Analyzer 的接口是：一个 Window 里该域的 Record 进去，零份或多份完整 Report 出来。不另做装配层，也不把多个 Analyzer 的 Report 合成一张；两条断言就是两份 Report。Report 类型在 server 上、在 `contracts/` 之外。agent 和 `contracts/<domain>` 不引用它们；`contracts/` 仍只放 Record。Window 值含 id、host、start、end；Evidence 对窗的依据是 id、start、end。时间线怎么切见：
 
-[一台 host 上的时间窗切法](2026-10-26-time-window-semantics.md)
+[一台 host 上的时间窗切法](2026-10-26-time-window-semantics.zh.md)
 
 Report 始终有 Window。
 

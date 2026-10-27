@@ -12,11 +12,11 @@
 ## 用法
 
 ```sh
-test/qemu/up.sh          # 构建、启动、等 SSH 就绪；打印启动事实
-test/qemu/push-agent.sh  # 用 scp 把 agent 放进 guest 并启动
-test/qemu/ssh.sh         # 进 guest 的 shell
-test/qemu/smoke.sh       # up + push-agent + 等 server 收到 Record
-test/qemu/down.sh        # 停止
+test/qemu/up.sh          # build, boot, wait for SSH; prints the boot facts
+test/qemu/push-agent.sh  # scp the agent into the guest and start it
+test/qemu/ssh.sh         # shell in the guest
+test/qemu/smoke.sh       # up + push-agent + wait for records on the server
+test/qemu/down.sh        # stop
 ```
 
 状态——镜像缓存、runner SSH 密钥、每次启动的 overlay、串口日志、启动事实——都在 `.runbin/qemu/`，已 gitignore。
