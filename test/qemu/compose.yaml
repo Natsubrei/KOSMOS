@@ -13,7 +13,7 @@ services:
     ports:
       - 127.0.0.1:${KOSMOS_SERVER_PORT:-8080}:8080
 
-  qemu-guest:
+  guest:
     build:
       context: .
       # A proxy bound to the host loopback is unreachable from the default

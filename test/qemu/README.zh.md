@@ -15,7 +15,7 @@
 test/qemu/up.sh          # build, boot, wait for SSH; prints the boot facts
 test/qemu/push-agent.sh  # scp the agent into the guest and start it
 test/qemu/ssh.sh         # shell in the guest
-test/qemu/smoke.sh       # up + push-agent + wait for records on the server
+test/qemu/smoke.sh       # up + push-agent + CPU hog + wait for a Report
 test/qemu/down.sh        # stop
 ```
 
@@ -37,5 +37,6 @@ test/qemu/down.sh        # stop
 | `KOSMOS_SSH_PORT` | 2222 | 发布到宿主机的 SSH 端口 |
 | `KOSMOS_SERVER_PORT` | 8080 | 发布到宿主机的 server 端口 |
 | `KOSMOS_BUILD_NETWORK` | `default` | 构建镜像时需要访问宿主机回环上的代理就设为 `host` |
+| `KOSMOS_REBUILD` | `0` | 设为 `1` 重建 guest 镜像；镜像缺失时才会自动构建 |
 
 镜像在 [images.env](images.env) 里按 URL 与校验和钉住；首次启动前校验和，之后 qcow2 留在缓存里。

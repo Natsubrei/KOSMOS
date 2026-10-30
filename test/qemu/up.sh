@@ -17,7 +17,18 @@ CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
 
 # Compose passes the host kvm GID through: the container only needs it when it
 # drops root, but a mismatch here is the classic silent /dev/kvm denial.
-KOSMOS_KVM_GID=$(stat -c %g /dev/kvm) docker compose up -d --build --wait
+# Building needs the apt mirror reachable from the build network; only pay that
+# when the image is absent or a rebuild was asked for.
+#
+# --remove-orphans is what makes a renamed service safe: Compose identifies
+# containers by service name, so the previous generation would otherwise keep
+# holding the published SSH port.
+build_flag=()
+if [[ ${KOSMOS_REBUILD:-0} == 1 ]] || ! docker image inspect kosmos-qemu-guest:latest >/dev/null 2>&1; then
+  build_flag=(--build)
+fi
+KOSMOS_KVM_GID=$(stat -c %g /dev/kvm) \
+  docker compose up -d --remove-orphans "${build_flag[@]}" --wait
 
 # The healthcheck turns green when SSH answers; the entrypoint writes the boot
 # facts a moment later, so wait for the last line before printing them.

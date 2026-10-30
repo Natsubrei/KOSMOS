@@ -16,7 +16,7 @@ agent uploads to. Why this image and what it costs is the
 test/qemu/up.sh          # build, boot, wait for SSH; prints the boot facts
 test/qemu/push-agent.sh  # scp the agent into the guest and start it
 test/qemu/ssh.sh         # shell in the guest
-test/qemu/smoke.sh       # up + push-agent + wait for records on the server
+test/qemu/smoke.sh       # up + push-agent + CPU hog + wait for a Report
 test/qemu/down.sh        # stop
 ```
 
@@ -42,6 +42,7 @@ lives in `.runbin/qemu/` and is gitignored.
 | `KOSMOS_SSH_PORT` | 2222 | published SSH port |
 | `KOSMOS_SERVER_PORT` | 8080 | published server port |
 | `KOSMOS_BUILD_NETWORK` | `default` | `host` when a proxy on the host loopback must be reachable during the image build |
+| `KOSMOS_REBUILD` | `0` | `1` rebuilds the guest image; it is built automatically only when missing |
 
 Images are pinned by URL and checksum in [images.env](images.env); the checksum
 is verified before the first boot, and the qcow2 is cached afterwards.
