@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# The single local gate: formatting, vet, tests, layering, bilingual pairs,
-# Markdown links. Stops at the first red gate with a nonzero exit.
+# The single local gate: formatting, vet, the index build, tests, layering,
+# shell syntax, Agent Note structure, bilingual pairs, Markdown links. Stops at
+# the first red gate with a nonzero exit.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -11,8 +12,10 @@ if [[ -n $unformatted ]]; then
 fi
 
 go vet ./...
+bash scripts/verify-index-build.sh
 go test -race ./...
 bash scripts/check-layering.sh
+bash scripts/verify-shell-syntax.sh
 bash scripts/verify-agent-notes.sh
 bash scripts/verify-translation-pair.sh
 bash scripts/verify-md-links.sh

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Layering gate for compile-time domain bundles: contracts are pure types (stdlib only),
 # domain bundles never import sibling domains, analyzers never import sibling analyzers,
-# and domain-free packages under internal/{agent,server} import no domain/analyzer package
-# — domain knowledge reaches the process only by registration in cmd/. Test files are
-# included via go list -deps -test. Violations print one line each and exit nonzero.
+# and domain-free packages under internal/{agent,server} import no domain, analyzer, or
+# contracts/<domain> package — domain knowledge reaches the process only by registration
+# in cmd/. Test files are included via go list -deps -test. Violations print one line
+# each and exit nonzero.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -32,15 +33,16 @@ for p in $(go list ./internal/agent/domain/...); do
   done < <(deps "$p" | grep -F "$module/internal/agent/domain/" | grep -vxF "$p")
 done
 
-# Rule 3: packages under internal/agent except domain/ import no domain.
+# Rule 3: packages under internal/agent except domain/ import no domain and no
+# contracts/<domain> — a domain reaches them only by registration in cmd/.
 for p in $(go list ./internal/agent/...); do
   case "$p" in
     "$module"/internal/agent/domain/*) continue ;;
   esac
   while IFS= read -r dep; do
-    printf 'layering: %s imports domain %s — register in cmd/ instead\n' "$p" "$dep"
+    printf 'layering: %s imports %s — register in cmd/ instead\n' "$p" "$dep"
     status=1
-  done < <(deps "$p" | grep -F "$module/internal/agent/domain/")
+  done < <(deps "$p" | grep -E "$module/(internal/agent/domain/|contracts/)")
 done
 
 # Rule 4: an analyzer imports no sibling analyzer.
@@ -51,18 +53,19 @@ for p in $(go list ./internal/server/analyzer/...); do
   done < <(deps "$p" | grep -F "$module/internal/server/analyzer/" | grep -vxF "$p")
 done
 
-# Rule 5: packages under internal/server except analyzer/ import no analyzer.
+# Rule 5: packages under internal/server except analyzer/ import no analyzer and
+# no contracts/<domain> — a domain reaches them only by registration in cmd/.
 for p in $(go list ./internal/server/...); do
   case "$p" in
     "$module"/internal/server/analyzer/*) continue ;;
   esac
   while IFS= read -r dep; do
-    printf 'layering: %s imports analyzer %s — register in cmd/ instead\n' "$p" "$dep"
+    printf 'layering: %s imports %s — register in cmd/ instead\n' "$p" "$dep"
     status=1
-  done < <(deps "$p" | grep -F "$module/internal/server/analyzer/")
+  done < <(deps "$p" | grep -E "$module/(internal/server/analyzer/|contracts/)")
 done
 
 if (( status == 0 )); then
-  echo "layering: OK (contracts pure, no sibling-domain or sibling-analyzer imports, domain-free packages import no domain)"
+  echo "layering: OK (contracts pure, no sibling-domain or sibling-analyzer imports, domain-free packages import no domain or contracts)"
 fi
 exit "$status"

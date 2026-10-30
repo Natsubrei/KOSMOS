@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Pre-commit checkpoints: only the gates that match staged files, and no
 # tests. CI owns the full matrix (scripts/check.sh); pre-push runs the tests.
+# The index-build gate is the exception: it validates what a commit would
+# actually contain, so it belongs here more than in CI.
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 
@@ -17,6 +19,16 @@ if [[ -n $go_files ]]; then
     exit 1
   fi
   go vet ./...
+fi
+
+# Catches a build input left unstaged: the index, not the worktree, is what a
+# clone receives.
+if printf '%s\n' "$staged" | grep -qE '\.go$|(^|/)go\.(mod|sum)$|\.o$'; then
+  bash scripts/verify-index-build.sh
+fi
+
+if printf '%s\n' "$staged" | grep -qE '\.sh$|^scripts/git-hooks/'; then
+  bash scripts/verify-shell-syntax.sh
 fi
 
 if [[ -n $staged ]] && printf '%s\n' "$staged" | grep -qE '\.md$'; then
