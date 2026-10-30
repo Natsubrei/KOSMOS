@@ -31,4 +31,4 @@ Record 上的 `Pid` / `Tid` / `Starttime` 在排空时从 `/proc/<tid>` 读。4.
 
 ## 后果
 
-`internal/agent/domain/cpu` 加载 cilium/ebpf 字节码，发出 `TaskRuntime`。CPU Analyzer 按 `{pid,tid,starttime}` 累加 `OnCPUNs`，超过一秒就出一份 Report。`Stop` 在关探针前再排空一次，最后一个间隔不会丢。4.9 地板路径和 steal time 仍是以后的附着工作。
+`internal/agent/domain/cpu` 加载 cilium/ebpf 字节码，发出 `TaskRuntime`。CPU Analyzer 按 `{pid,tid,starttime}` 累加 `OnCPUNs`，超过 1 秒就出一份 Report——界限是该 Analyzer 上的字段（[Analyzer 的 Go 推导 Conclusion](2026-10-30-conclusions-in-analyzer-go.zh.md)）。`Stop` 在关探针前再排空一次，最后一个间隔不会丢。4.9 地板路径和 steal time 仍是以后的附着工作。

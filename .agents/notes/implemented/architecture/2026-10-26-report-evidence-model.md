@@ -76,6 +76,7 @@ A Report always has a Window.
 
 `internal/server/diagnose` holds the types. `GET /reports` encodes stored
 Reports; a human follows Conclusion → Evidence → Record snapshot or Missing
-source without joining live ingest. How Conclusions are derived and where
-bounds are configured sit outside this note. Severity and a problem-card
-aggregator are not this model.
+source without joining live ingest. How Conclusions are derived, and where
+bounds live, is
+[Conclusions derived in Analyzer Go](2026-10-30-conclusions-in-analyzer-go.md).
+Severity and a problem-card aggregator are not this model.

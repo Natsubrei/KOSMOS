@@ -20,7 +20,8 @@ const Tile = 10 * time.Second
 
 // Analyzer is the collection-domain seam on the server. One already-cut
 // Window of that domain's Records in, zero or more complete Reports out.
-// Implementations are compile-time packages.
+// Implementations are compile-time packages. Bounds and required sources are
+// that package's data and code, not this interface.
 type Analyzer interface {
 	// Name identifies this analyzer on Report.Analyzer, e.g. "cpu".
 	Name() string

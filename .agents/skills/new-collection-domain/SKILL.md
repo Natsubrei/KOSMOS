@@ -20,7 +20,9 @@ Five places, then the gates; domain-free packages stay untouched
 4. **Analyzer** — `internal/server/analyzer/<name>/`: implements
    `diagnose.Analyzer`. Register it in `cmd/server` next to the record-bus
    subscription. The diagnosis loop calls `Analyze`; the analyzer does not
-   subscribe to the bus.
+   subscribe to the bus. Bounds are fields on that Analyzer; the kit does not
+   pass them
+   ([Conclusions derived in Analyzer Go](../../notes/implemented/architecture/2026-10-30-conclusions-in-analyzer-go.md)).
 5. **Gates green**: `bash scripts/check.sh`. The layering gate auto-covers the
    new packages; a red line means the bundle reached across the seam — fix the
    code, and the gate stays.

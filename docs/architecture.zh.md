@@ -24,7 +24,7 @@
 
 `internal/server/httpapi` 把请求字节变成 Record 并发布；`GET /records` 列出存储留下的东西；`GET /reports` 列出诊断产出。`internal/server/control` 对每个 `host` 持有一条会话，下发该 host 该跑的域快照。`internal/server/store` 把 Record 留在进程内存里。
 
-`internal/server/diagnose` 是诊断工具箱。它按 10 秒的 Unix-UTC 切开 Window，并调用每一个已注册的 `Analyzer`；Analyzer 是一窗某一域的 Record 进、零或多份完整 Report 出。`internal/server/analyzer/<domain>` 是实现那一处的包。
+`internal/server/diagnose` 是诊断工具箱。它按 10 秒的 Unix-UTC 切开 Window，并调用每一个已注册的 `Analyzer`；Analyzer 是一窗某一域的 Record 进、零或多份完整 Report 出。每个 Analyzer 在自己的 Go 里推导 Conclusion；数值界限是该实例上的字段，不在诊断工具箱上。`internal/server/analyzer/<domain>` 是实现那一处的包。
 
 `cmd/server` 是把域键接到记录总线、控制快照和 Analyzer 的唯一地方，就像 `cmd/agent` 是注册域包的唯一地方。
 

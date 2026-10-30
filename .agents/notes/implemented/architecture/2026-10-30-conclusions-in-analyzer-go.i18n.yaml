@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for .agents/notes/implemented/architecture/2026-10-30-conclusions-in-analyzer-go.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/implemented/architecture/2026-10-30-conclusions-in-analyzer-go.md
+/2026-10-30-conclusions-in-analyzer-go:
+  en: 131ac9ee772ddeda
+  zh: 42c65b5ddf4fed7e
+/2026-10-30-conclusions-in-analyzer-go/problem:
+  en: e3749c543ff3bc5a
+  zh: f58d954665514fdc
+/2026-10-30-conclusions-in-analyzer-go/decision:
+  en: db99b7d6f7697705
+  zh: 6323918d17440e55
+/2026-10-30-conclusions-in-analyzer-go/alternatives-considered:
+  en: 8394db6590d003f6
+  zh: 83999e4aa8272681
+/2026-10-30-conclusions-in-analyzer-go/consequences:
+  en: d757e43d94fdceed
+  zh: cb4555fb208f9372

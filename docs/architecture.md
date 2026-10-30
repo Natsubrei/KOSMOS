@@ -42,8 +42,9 @@ process memory.
 
 `internal/server/diagnose` is the diagnosis kit. It cuts 10-second Unix-UTC
 Windows and calls every registered `Analyzer`; an Analyzer is one Window of one
-domain's Records in, zero or more complete Reports out.
-`internal/server/analyzer/<domain>` is the package that implements that.
+domain's Records in, zero or more complete Reports out. Each Analyzer derives
+Conclusions in its own Go; numeric bounds are fields on that value, not on the
+kit. `internal/server/analyzer/<domain>` is the package that implements that.
 
 `cmd/server` is the only place that wires a domain key to the record bus, the
 control snapshot, and an Analyzer, the way `cmd/agent` is the only place that

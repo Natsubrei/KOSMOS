@@ -59,6 +59,8 @@ dropped rather than reported. Neither can be observed from the Report.
 
 `internal/agent/domain/cpu` loads cilium/ebpf bytecode and emits
 `TaskRuntime`. The CPU Analyzer sums `OnCPUNs` per `{pid,tid,starttime}` and
-emits a Report when the sum exceeds one second. `Stop` drains once more before
-closing the probe, so the last interval is not lost. The 4.9 floor path and
-steal time remain future attach work.
+produces a Report when the sum exceeds one second — the bound is a field on
+that Analyzer
+([Conclusions derived in Analyzer Go](2026-10-30-conclusions-in-analyzer-go.md)).
+`Stop` drains once more before closing the probe, so the last interval is not
+lost. The 4.9 floor path and steal time remain future attach work.

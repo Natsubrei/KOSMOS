@@ -1,6 +1,6 @@
 // Package cpu is the CPU-scheduling Analyzer: one Window of cpu Records in,
-// zero or more complete Reports out. Bounds are constants until the
-// scenario/threshold work replaces them.
+// zero or more complete Reports out. The bound is a field on Analyzer; New
+// fills defaultNs. Analyze reads the field and copies it into Predicate.Bound.
 package cpu
 
 import (

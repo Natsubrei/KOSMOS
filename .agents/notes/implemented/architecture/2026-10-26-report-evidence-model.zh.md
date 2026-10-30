@@ -37,4 +37,6 @@ Report 始终有 Window。
 
 ## 后果
 
-类型在 `internal/server/diagnose`。`GET /reports` 编码已存的 Report；人从 Conclusion 跟到 Evidence 再跟到 Record 快照或 Missing source，不必去接收存储做 join。Conclusion 怎么推导、边界配在哪，都不是本笔记。严重程度和问题卡聚合器不是这个模型。
+类型在 `internal/server/diagnose`。`GET /reports` 编码已存的 Report；人从 Conclusion 跟到 Evidence 再跟到 Record 快照或 Missing source，不必去接收存储做 join。Conclusion 怎么推导、界限在哪，见
+[Analyzer 的 Go 推导 Conclusion](2026-10-30-conclusions-in-analyzer-go.zh.md)。
+严重程度和问题卡聚合器不是这个模型。
