@@ -1,6 +1,6 @@
 # Agent Note: Report and evidence-chain data model
 
-Status: proposed
+Status: implemented
 
 English | [中文](2026-10-26-report-evidence-model.zh.md)
 
@@ -10,12 +10,13 @@ A human must audit why a diagnosis follows. Surveyed eBPF products stop at
 telemetry, LLM prose, or closed causal engines; none ship a deterministic
 evidence chain. Without that document, `GET /records` cannot become a report.
 
-## Proposal
+## Decision
 
 A **Report** is the auditable document: one **Conclusion**, the **Evidence**
 it rests on, and the **Window** it covers. It is an immutable value
-`{id, produced_at, host, analyzer, window, conclusion, evidence}`. A later
-run is a different Report. The Report does not record who asked.
+`{id, produced_at, host, analyzer, window, conclusion, evidence}` in
+`internal/server/diagnose`. A later run is a different Report. The Report
+does not record who asked.
 
 The Conclusion is a typed claim `{kind, subject, stance}`, not prose.
 Stance is holds, does not hold, or insufficient evidence. **Subject** is
@@ -29,24 +30,25 @@ The Conclusion rests on at least one Evidence item. There is no separate
 justification field. Evidence is `{id, kind, payload, citations}` with an
 optional **Predicate** `{observed, operator, bound}`. `kind` is an opaque
 string namespaced by collection domain (`cpu.…`), owned by the Analyzer
-package, not by `contracts/`. Domain-free packages do not branch on kind. Evidence
-ids are unique inside one Report. Today's Predicate operators are the closed
-set `lt | le | gt | ge | eq` and compare numbers; a later non-numeric
-comparison still uses Predicate.
+package, not by `contracts/`. Domain-free packages do not branch on kind.
+Evidence ids are unique inside one Report. Today's Predicate operators are
+the closed set `lt | le | gt | ge | eq` and compare numbers; a later
+non-numeric comparison still uses Predicate.
 
 Each entry in the rests-on list is a Record snapshot `{domain, at, payload}`
 (the observation used, not every Record in the window), a Window
 `{id, start, end}` with `end` exclusive, another Evidence id in the same
 Report (a DAG, no cycles), or a **Missing source** `{source, reason}`. An
-insufficient-evidence Conclusion rests on at least one Missing source. Aggregates may
-cite only a Window and keep the histogram in payload.
+insufficient-evidence Conclusion rests on at least one Missing source.
+Aggregates may cite only a Window and keep the histogram in payload.
 
 The Analyzer's interface is one Window's Records for its domain in, zero or
-more complete Reports out. Nothing besides the Analyzer assembles fragments or merges
-Reports across analyzers; two claims are two Reports. Report types belong
-on the server, outside `contracts/`. The agent and `contracts/<domain>` do not import them;
-`contracts/` still hold only Records. The Window value is `{id, host, start, end}`;
-Evidence cites `{id, start, end}`. How the timeline is cut is
+more complete Reports out. Nothing besides the Analyzer assembles fragments
+or merges Reports across analyzers; two claims are two Reports. Report types
+belong on the server, outside `contracts/`. The agent and `contracts/<domain>`
+do not import them; `contracts/` still hold only Records. The Window value
+is `{id, host, start, end}`; Evidence cites `{id, start, end}`. How the
+timeline is cut is
 [Time-window cut on one host](2026-10-26-time-window-semantics.md).
 A Report always has a Window.
 
@@ -70,15 +72,10 @@ A Report always has a Window.
 - **Severity or confidence on the Conclusion:** rejected for this model —
   stance and Evidence are enough to audit; ranking is not.
 
-## Acceptance criteria
+## Consequences
 
-An Analyzer turns one Window's Records into zero or more complete Reports.
-A human can GET a Report JSON and follow Conclusion → Evidence → Record
-snapshot or Missing source without joining live ingest. Report types live
-on the server, outside `contracts/`.
-
-## Risks
-
-How Conclusions are derived and where bounds are configured sit outside this
-note. `GET /records` remains receive-and-list. Severity, a problem-card
-aggregator, and HTTP paths for Reports are not this note.
+`internal/server/diagnose` holds the types. `GET /reports` encodes stored
+Reports; a human follows Conclusion → Evidence → Record snapshot or Missing
+source without joining live ingest. How Conclusions are derived and where
+bounds are configured sit outside this note. Severity and a problem-card
+aggregator are not this model.

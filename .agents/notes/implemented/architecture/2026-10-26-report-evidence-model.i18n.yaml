@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for .agents/notes/implemented/architecture/2026-10-26-report-evidence-model.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/implemented/architecture/2026-10-26-report-evidence-model.md
+/2026-10-26-report-evidence-model:
+  en: 642644aa3b1afa76
+  zh: 7ab00223a80bbbee
+/2026-10-26-report-evidence-model/problem:
+  en: 6f5ac03ed3cf9ae7
+  zh: a1e0d95c4a342e6c
+/2026-10-26-report-evidence-model/decision:
+  en: 1534bf903518db92
+  zh: 00ae3c4bbb39a2d3
+/2026-10-26-report-evidence-model/alternatives-considered:
+  en: 057cdbec28618333
+  zh: 295b3874f778393a
+/2026-10-26-report-evidence-model/consequences:
+  en: 9490811e5dd129fc
+  zh: cc7ac87959e2bdd0

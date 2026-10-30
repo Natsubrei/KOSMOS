@@ -1,6 +1,6 @@
 # Agent Note: Report and evidence-chain data model
 
-Status: proposed
+Status: implemented
 
 [English](2026-10-26-report-evidence-model.md) | 中文
 
@@ -8,9 +8,9 @@ Status: proposed
 
 人必须能审计一条诊断为何成立。已调研的 eBPF 产品停在遥测、大模型散文或闭源因果引擎，没有一份可复现的证据链。没有这份文档，`GET /records` 也不能变成 Report。
 
-## 提案
+## 决策
 
-**Report** 是人审计的文档：一条 **Conclusion**、它所依据的 **Evidence**、以及它所覆盖的 **Window**。它是不可变值，含 id、produced_at、host、analyzer、window、conclusion、evidence。再跑一次是另一份 Report。Report 不记录是谁提出诊断。
+**Report** 是人审计的文档：一条 **Conclusion**、它所依据的 **Evidence**、以及它所覆盖的 **Window**。它是不可变值，含 id、produced_at、host、analyzer、window、conclusion、evidence，类型在 `internal/server/diagnose`。再跑一次是另一份 Report。Report 不记录是谁提出诊断。
 
 Conclusion 是带类型的断言（kind、subject、stance），不是一段话。stance 为成立、不成立或证据不足。**Subject** 是断言所关于的身份：host、pid、tid、starttime；starttime 与 `/proc/<pid>/stat` 同源，避免 PID 复用把两个任务当成同一个。进程级断言的 tid 为空。comm 与 cgroup 只做注解，不当身份。当前形状是一台主机上的 Linux 任务；第二种形状等那个采集域存在再加。
 
@@ -35,10 +35,6 @@ Report 始终有 Window。
 - **把多个 Analyzer 的 Report 合成一张卡**：否决——那是以后的产品面，不是这个模型。
 - **Conclusion 上加严重程度或置信度**：本模型否决——stance 与 Evidence 已够审计；排序不是本模型的事。
 
-## 验收标准
+## 后果
 
-Analyzer 把一扇窗的 Record 变成 0 份或多份完整 Report。人能 GET 一份 Report 的 JSON，从 Conclusion 跟到 Evidence 再跟到 Record 快照或 Missing source，不必去接收存储做 join。Report 类型在 server 上、`contracts/` 之外。
-
-## 风险
-
-Conclusion 怎么推导、边界配在哪，都不是本笔记。`GET /records` 仍是接收和列出。严重程度、问题卡聚合器、Report 的 HTTP 路径不是本笔记。
+类型在 `internal/server/diagnose`。`GET /reports` 编码已存的 Report；人从 Conclusion 跟到 Evidence 再跟到 Record 快照或 Missing source，不必去接收存储做 join。Conclusion 怎么推导、边界配在哪，都不是本笔记。严重程度和问题卡聚合器不是这个模型。

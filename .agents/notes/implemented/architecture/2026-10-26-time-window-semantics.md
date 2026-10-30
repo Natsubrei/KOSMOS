@@ -1,6 +1,6 @@
 # Agent Note: Time-window cut on one host
 
-Status: proposed
+Status: implemented
 
 English | [中文](2026-10-26-time-window-semantics.zh.md)
 
@@ -10,13 +10,13 @@ A Report must cover a Window, and Evidence may rest on that Window as a
 snapshot `{id, start, end}`. Without a single cut, each Analyzer would pick
 its own interval, and two Reports could not mean the same span.
 
-## Proposal
+## Decision
 
 A **Window** is `{id, host, start, end}` on one host. `start` and `end` use
 the same wall clock as `Record.at` (stamped at emit); `end` is exclusive.
-Domain-free server code cuts Windows. The agent emits Records only. The
-Analyzer receives one already-cut Window and does not change `start` or
-`end`.
+Domain-free server code in `internal/server/diagnose` cuts Windows. The
+agent emits Records only. The Analyzer receives one already-cut Window and
+does not change `start` or `end`.
 
 Records do not carry a window id. The cut happens when diagnosis runs: the
 cutter takes a host and a closed `[start, end)`, assigns the id, and hands
@@ -25,10 +25,10 @@ that interval's Records to every Analyzer for that host. The same
 different Report, not a different Window.
 
 The timeline is adjacent 10-second intervals, Unix UTC aligned (`start` is
-a multiple of 10 seconds, `end = start + 10s`). The length is one server
-constant for every host and collection domain. No sliding intervals, no
-incident-triggered open or close. Windows do not store parent, prev, or
-next; adjacency is `end == next.start`.
+a multiple of 10 seconds, `end = start + 10s`). The length is `diagnose.Tile`,
+one server constant for every host and collection domain. No sliding
+intervals, no incident-triggered open or close. Windows do not store parent,
+prev, or next; adjacency is `end == next.start`.
 
 Only a closed interval is cut: `end` is not after the server's wall clock
 at cut time. Evidence may cite only this Report's Window, as `{id, start,
@@ -57,17 +57,10 @@ neighbouring intervals. The Analyzer still sees only this Window's Records.
 - **Cite a neighbouring Window from Evidence:** rejected — that is a
   second Window of Records, against one Window in.
 
-## Acceptance criteria
+## Consequences
 
-Domain-free server code cuts 10-second Unix-UTC Windows per host at diagnosis.
-An Analyzer receives one already-cut Window and does not change `start` or
-`end`. Late Records do not rewrite Reports. `GET /records` remains
-receive-and-list.
-
-## Risks
-
-The cutter runs as in the storage note. Window types land with the first
-Analyzer; this note does not add them. The 10-second constant can change
-without changing the Window shape.
+`Loop.Tick` drains every closed undiagnosed Window. Late Records do not
+rewrite Reports. `GET /records` remains receive-and-list. The 10-second
+constant can change without changing the Window shape.
 
 [In-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md)

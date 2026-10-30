@@ -68,6 +68,6 @@ handle. TLS and enrollment are a later auth model.
 
 [Record-path seams](2026-10-26-record-path-seams.md)
 
-[In-memory store and the ingest/diagnosis boundary](../../proposed/architecture/2026-10-27-storage-async-boundary.md)
+[In-memory store and the ingest/diagnosis boundary](2026-10-27-storage-async-boundary.md)
 
 [Compile-time domain bundles](2026-10-25-compile-time-domain-bundles.md)

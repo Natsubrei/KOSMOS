@@ -1,6 +1,6 @@
 # Agent Note: In-memory store and the ingest/diagnosis boundary
 
-Status: proposed
+Status: implemented
 
 [English](2026-10-27-storage-async-boundary.md) | 中文
 
@@ -8,13 +8,13 @@ Status: proposed
 
 诊断需要按 host 把 Record 切进已关闭的 Window，并且 Report 不必去接收存储做 join 仍可读。接收路径已经把 Record 放在进程内存里。在一台测试机还没跑出量之前，上数据库、第二套消费者模型、或多段处理 pipeline，都是多出来的面。
 
-## 提案
+## 决策
 
 Record、Report、以及已诊断区间的集合都活在 server 进程里。重启即丢。这次不上 PostgreSQL、SQLite、Timescale，也不留空的存储适配器。没有滚动删除：留存等于进程寿命。
 
-**Record** 带 `host`：被采集的那台机器，由 agent（采集端）在发出时盖上，随 `POST /records` 发送。server 不从 TCP 对端推断 host。切窗和已诊断集合都按这个 `host` 分组。
+**Record** 带 `host`：被采集的那台机器，由 agent 在发出时盖上，随 `POST /records` 发送。server 不从 TCP 对端推断 host。切窗和已诊断集合都按这个 `host` 分组。
 
-`POST /records` 只做追加。诊断是进程内另一条 ticker 循环、单个消费者：切最早一扇已关闭且尚未诊断的 Window（`end` 不晚于 server 墙钟），跑 Analyzer，即使 0 份 Report 也把该 host、start、end 标成已诊断。不在每次接收时跑，也不提供「请诊断」的 HTTP。
+`POST /records` 只做追加。诊断是进程内另一条 ticker 循环、单个消费者：每次 Tick 切完所有已关闭且尚未诊断的 Window（`end` 不晚于 server 墙钟），跑 Analyzer，即使 0 份 Report 也把该 host、start、end 标成已诊断。不在每次接收时跑，也不提供「请诊断」的 HTTP。
 
 没有 Window 表。Window 在切窗时算出，嵌进 Report。迟到的 Record（`at` 落在已诊断区间）仍追加；已有 Report 不变；循环不再切该区间。
 
@@ -33,10 +33,6 @@ Record、Report、以及已诊断区间的集合都活在 server 进程里。重
 - **从 TCP 对端推断 host**：否决——NAT 会指向错误的机器。
 - **把这条路径叫 pipeline**：否决——总线是扇出；诊断是后面一个消费者，不是一串阶段。
 
-## 验收标准
+## 后果
 
-`POST /records` 只做追加。一条进程内 ticker 切最早一扇已关闭且尚未诊断的 Window，并跑 Analyzer。空窗也标成已诊断。Record、Report、已诊断集合都在进程内存里。重启即丢。
-
-## 风险
-
-ticker 间隔和列出 Report 的 HTTP 路径，随第一个 Analyzer 落地。`GET /records` 仍是接收和列出。Conclusion 怎么推导仍不是本笔记。SQLite 等骨架跑出量再说。
+`internal/server/store` 留 Record。`internal/server/diagnose.Loop` 留 Report 和已诊断集合。`GET /reports` 列出 Report。`GET /records` 仍是接收和列出。Conclusion 怎么推导仍不是本笔记。SQLite 等跑出量再说。

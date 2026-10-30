@@ -1,6 +1,6 @@
 # Agent Note: Time-window cut on one host
 
-Status: proposed
+Status: implemented
 
 [English](2026-10-26-time-window-semantics.md) | 中文
 
@@ -8,13 +8,13 @@ Status: proposed
 
 Report 必须覆盖一扇 Window，Evidence 也可以把该窗当作 id、start、end 快照来依据。若没有统一的切法，每个 Analyzer 会自选区间，两份 Report 就不能表示同一段时间。
 
-## 提案
+## 决策
 
-**Window** 是一台 host 上的 id、host、start、end。`start` 与 `end` 和 `Record.at` 同一墙钟（发出时盖上）；`end` 不含。由 server 上不含域知识的代码切窗。agent（采集端）只发 Record。Analyzer 吃已经切好的一扇窗，不改 `start` 或 `end`。
+**Window** 是一台 host 上的 id、host、start、end。`start` 与 `end` 和 `Record.at` 同一墙钟（发出时盖上）；`end` 不含。由 `internal/server/diagnose` 里不含域知识的代码切窗。agent 只发 Record。Analyzer 吃已经切好的一扇窗，不改 `start` 或 `end`。
 
 Record 不带 window id。诊断要跑时才切：切窗代码接受一台 host 和一截已关闭的半开区间（start 起、end 不含），赋 id，把该区间内的 Record 交给该 host 上每个 Analyzer。同一 host、start、end 永远得到同一 id；再跑一次是另一份 Report，不是另一扇 Window。
 
-时间线切成相邻的 10 秒半开区间，按 Unix UTC 对齐（`start` 是 10 秒的整数倍，`end = start + 10s`）。所有 host、所有采集域（Collection domain）共用 server 上这一个常量长度。不滑动，不按事故开窗或平息关窗。Window 不存 parent、prev、next；相邻就是 `end == 下一扇的 start`。
+时间线切成相邻的 10 秒半开区间，按 Unix UTC 对齐（`start` 是 10 秒的整数倍，`end = start + 10s`）。长度是 `diagnose.Tile`，所有 host、所有采集域共用这一个 server 常量。不滑动，不按事故开窗或平息关窗。Window 不存 parent、prev、next；相邻就是 `end == 下一扇的 start`。
 
 只切已关闭的区间：切窗时 `end` 不晚于 server 墙钟。Evidence 里对窗的依据只能是本 Report 的那一扇，以 id、start、end 嵌在 Report 里（不是去存储做实时查找），不能指向相邻区间。Analyzer 仍然只看见这一扇窗里的 Record。
 
@@ -30,12 +30,8 @@ Record 不带 window id。诊断要跑时才切：切窗代码接受一台 host 
 - **按域或按 host 各设长度**：否决——切窗代码不含域知识。
 - **Evidence 引用相邻 Window**：否决——那是第二扇窗的 Record，和「一窗进」冲突。
 
-## 验收标准
+## 后果
 
-不含域知识的 server 代码在诊断时按 host 切 10 秒 Unix-UTC 窗。Analyzer 拿到的是已切好的一扇窗，不改 `start` 或 `end`。迟到的 Record 不改已有 Report。`GET /records` 仍是接收和列出。
-
-## 风险
-
-切窗怎么跑见存储笔记。Window 类型随第一个 Analyzer 落地；本笔记不引入它们。10 秒这个常量可以改，Window 形状不用改。
+`Loop.Tick` 一次切完所有已关闭且尚未诊断的窗。迟到的 Record 不改已有 Report。`GET /records` 仍是接收和列出。10 秒这个常量可以改，Window 形状不用改。
 
 [内存存储与接收/诊断边界](2026-10-27-storage-async-boundary.zh.md)

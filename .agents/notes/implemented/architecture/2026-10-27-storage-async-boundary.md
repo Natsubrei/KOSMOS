@@ -1,6 +1,6 @@
 # Agent Note: In-memory store and the ingest/diagnosis boundary
 
-Status: proposed
+Status: implemented
 
 English | [中文](2026-10-27-storage-async-boundary.zh.md)
 
@@ -12,7 +12,7 @@ keeps Records in process memory. A database, a second consumer model, or a
 staged processing pipeline would add surface before a single test guest has
 produced volume.
 
-## Proposal
+## Decision
 
 Records, Reports, and the set of diagnosed intervals live in the server
 process. Restart loses them. There is no PostgreSQL, SQLite, or Timescale
@@ -25,7 +25,7 @@ host from the TCP peer. Windows and the diagnosed set are keyed by this
 `host`.
 
 `POST /records` only appends. Diagnosis is a separate in-process ticker
-loop with one consumer: it cuts the oldest closed, not-yet-diagnosed
+loop with one consumer: each Tick drains every closed, not-yet-diagnosed
 Window (`end` not after the server's wall clock), runs Analyzers, and
 marks `(host, start, end)` diagnosed even when no Report is produced.
 It does not run on each ingest, and it does not expose a diagnose HTTP
@@ -63,16 +63,9 @@ single consumer. It is not a multi-stage pipeline.
 - **Call the path a pipeline:** rejected — the bus fans out; diagnosis
   is one later consumer, not a chain of stages.
 
-## Acceptance criteria
+## Consequences
 
-`POST /records` only appends. One in-process ticker cuts the oldest closed
-undiagnosed Window and runs Analyzers. Empty windows are still marked
-diagnosed. Records, Reports, and the diagnosed set live in process memory.
-Restart loses them.
-
-## Risks
-
-The ticker period and HTTP paths that list Reports land with the first
-Analyzer. `GET /records` remains receive-and-list. How Conclusions are
-derived is still outside this note. SQLite waits on volume from the
-skeleton.
+`internal/server/store` keeps Records. `internal/server/diagnose.Loop`
+keeps Reports and the diagnosed set. `GET /reports` lists Reports.
+`GET /records` remains receive-and-list. How Conclusions are derived is
+still outside this note. SQLite waits on volume.

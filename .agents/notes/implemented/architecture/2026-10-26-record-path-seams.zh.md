@@ -29,7 +29,7 @@ agent 到 server 是主动外连的 HTTP JSON（`POST /records`，JSON 数组，
 - **现在就上 PostgreSQL（或 SQLite）**：否决——追加/列出后面的 Memory 就够；空适配器是债。
 - **GET 返回证据链 Report**：否决（仅这次）——模型见下。`GET /records` 仍是接收和列出。
 
-[Report 与 Evidence 链](../../proposed/architecture/2026-10-26-report-evidence-model.zh.md)
+[Report 与 Evidence 链](2026-10-26-report-evidence-model.zh.md)
 
 ## 后果
 
@@ -37,4 +37,4 @@ agent 到 server 是主动外连的 HTTP JSON（`POST /records`，JSON 数组，
 
 [数据通道与控制会话](2026-10-27-agent-server-protocol.zh.md)
 
-[内存存储与接收/诊断边界](../../proposed/architecture/2026-10-27-storage-async-boundary.zh.md)
+[内存存储与接收/诊断边界](2026-10-27-storage-async-boundary.zh.md)

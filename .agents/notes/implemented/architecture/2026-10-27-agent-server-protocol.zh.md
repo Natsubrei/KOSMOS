@@ -39,6 +39,6 @@ Status: implemented
 
 [记录路径缝](2026-10-26-record-path-seams.zh.md)
 
-[内存存储与接收/诊断边界](../../proposed/architecture/2026-10-27-storage-async-boundary.zh.md)
+[内存存储与接收/诊断边界](2026-10-27-storage-async-boundary.zh.md)
 
 [编译期域包](2026-10-25-compile-time-domain-bundles.zh.md)
