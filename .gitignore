@@ -1,3 +1,4 @@
 .tmp-*
 .runbin/
 docs/research/
+internal/agent/domain/cpu/bpf/vmlinux.h

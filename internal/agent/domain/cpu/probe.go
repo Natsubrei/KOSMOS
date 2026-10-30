@@ -27,10 +27,10 @@ func (p *ebpfProbe) open() error {
 	if err := loadCpuObjects(&p.objs, nil); err != nil {
 		return fmt.Errorf("cpu: load bpf: %w", err)
 	}
-	tp, err := link.Tracepoint("sched", "sched_switch", p.objs.OnSchedSwitch, nil)
+	tp, err := link.AttachTracing(link.TracingOptions{Program: p.objs.OnSchedSwitch})
 	if err != nil {
 		_ = p.objs.Close()
-		return fmt.Errorf("cpu: attach sched_switch: %w", err)
+		return fmt.Errorf("cpu: attach tp_btf/sched_switch: %w", err)
 	}
 	p.tp = tp
 	return nil
@@ -49,9 +49,9 @@ func (p *ebpfProbe) close() error {
 }
 
 func (p *ebpfProbe) snapshot() ([]cpucontracts.TaskRuntime, error) {
-	var keys []uint32
+	var keys []cpuTaskKey
 	var vals []cpuTaskVal
-	var k uint32
+	var k cpuTaskKey
 	var v cpuTaskVal
 	it := p.objs.RuntimeNs.Iterate()
 	for it.Next(&k, &v) {
@@ -66,13 +66,18 @@ func (p *ebpfProbe) snapshot() ([]cpucontracts.TaskRuntime, error) {
 		if err := p.objs.RuntimeNs.Delete(&k); err != nil {
 			return nil, fmt.Errorf("cpu: delete runtime_ns: %w", err)
 		}
-		pid, start, ok := taskIdentity(k)
-		if !ok {
-			continue
-		}
-		out = append(out, cpucontracts.TaskRuntime{
-			Pid: pid, Tid: int32(k), Starttime: start, OnCPUNs: vals[i].OnCpuNs,
-		})
+		out = append(out, taskRuntime(k, vals[i]))
 	}
 	return out, nil
+}
+
+// taskRuntime maps one kernel map entry to the record contract. The kernel key
+// carries the thread-group id as tgid; the contract calls it Pid.
+func taskRuntime(k cpuTaskKey, v cpuTaskVal) cpucontracts.TaskRuntime {
+	return cpucontracts.TaskRuntime{
+		Pid:       int32(k.Tgid),
+		Tid:       int32(k.Tid),
+		Starttime: k.StartTime,
+		OnCPUNs:   v.OnCpuNs,
+	}
 }

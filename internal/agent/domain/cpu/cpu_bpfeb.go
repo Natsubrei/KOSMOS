@@ -13,6 +13,13 @@ import (
 	"github.com/cilium/ebpf"
 )
 
+type cpuTaskKey struct {
+	_         structs.HostLayout
+	Tid       uint32
+	Tgid      uint32
+	StartTime uint64
+}
+
 type cpuTaskVal struct {
 	_       structs.HostLayout
 	OnCpuNs uint64

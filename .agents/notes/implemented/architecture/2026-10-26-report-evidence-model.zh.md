@@ -12,7 +12,7 @@ Status: implemented
 
 **Report** 是人审计的文档：一条 **Conclusion**、它所依据的 **Evidence**、以及它所覆盖的 **Window**。它是不可变值，含 id、produced_at、host、analyzer、window、conclusion、evidence，类型在 `internal/server/diagnose`。再跑一次是另一份 Report。Report 不记录是谁提出诊断。
 
-Conclusion 是带类型的断言（kind、subject、stance），不是一段话。stance 为成立、不成立或证据不足。**Subject** 是断言所关于的身份：host、pid、tid、starttime；starttime 与 `/proc/<pid>/stat` 同源，避免 PID 复用把两个任务当成同一个。进程级断言的 tid 为空。comm 与 cgroup 只做注解，不当身份。当前形状是一台主机上的 Linux 任务；第二种形状等那个采集域存在再加。
+Conclusion 是带类型的断言（kind、subject、stance），不是一段话。stance 为成立、不成立或证据不足。**Subject** 是断言所关于的身份：host、pid、tid、starttime；starttime 是 `task_struct.start_time`（自开机起的纳秒），避免 PID 复用把两个任务当成同一个。进程级断言的 tid 为空。comm 与 cgroup 只做注解，不当身份。当前形状是一台主机上的 Linux 任务；第二种形状等那个采集域存在再加。
 
 Conclusion 至少依据一条 Evidence。没有独立的理由字段。Evidence 含 id、kind、payload、依据列表，以及可选的 **Predicate**（observed、operator、bound）。kind 是按采集域加前缀的不透明字符串（`cpu.…`），常量在 Analyzer 包，不进 `contracts/`。不含域知识的包不按 kind 分支。Evidence 的 id 只在本 Report 内唯一。当前 Predicate 的算子是闭集 `lt | le | gt | ge | eq`，只比较数；以后非数值比较仍用 Predicate。
 

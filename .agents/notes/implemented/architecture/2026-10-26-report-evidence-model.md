@@ -21,7 +21,7 @@ does not record who asked.
 The Conclusion is a typed claim `{kind, subject, stance}`, not prose.
 Stance is holds, does not hold, or insufficient evidence. **Subject** is
 the identity the claim is about: `{host, pid, tid, starttime}`;
-`starttime` matches `/proc/<pid>/stat` so PID reuse does not alias. A
+`starttime` is `task_struct.start_time` (nsec since boot) so PID reuse does not alias. A
 process-level claim leaves `tid` empty. `comm` and cgroup are annotations,
 not identity. This shape is a Linux task on a host; a second shape is added
 when that collection domain exists.

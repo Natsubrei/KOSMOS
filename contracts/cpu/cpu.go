@@ -8,7 +8,8 @@ const Domain = "cpu"
 
 // TaskRuntime is one task's on-CPU time after in-kernel aggregation over
 // one drain interval. Pid is the thread-group id; Tid is the thread id;
-// Starttime is /proc/<tid>/stat field 22 so PID reuse does not alias.
+// Starttime is task_struct.start_time (nsec since boot) so PID reuse does
+// not alias.
 type TaskRuntime struct {
 	Pid       int32
 	Tid       int32

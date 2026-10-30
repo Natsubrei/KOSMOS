@@ -1,0 +1,20 @@
+# Bilingual-pair consistency record for .agents/notes/implemented/architecture/2026-10-30-in-kernel-task-identity.md: per heading section, a hash of
+# its English and Chinese blocks outside code blocks. Sections pair positionally;
+# keys come from the English headings. After editing either side, bring the other
+# along and re-record with:
+#   scripts/verify-translation-pair.sh --write .agents/notes/implemented/architecture/2026-10-30-in-kernel-task-identity.md
+/2026-10-30-in-kernel-task-identity:
+  en: 729d1f442cdc9076
+  zh: 64a003f5326bad04
+/2026-10-30-in-kernel-task-identity/problem:
+  en: 09dcf7136eecbac7
+  zh: fd920f94a94a1d73
+/2026-10-30-in-kernel-task-identity/decision:
+  en: e0fe5585646b542c
+  zh: 6afd28536361b9b8
+/2026-10-30-in-kernel-task-identity/alternatives-considered:
+  en: 9a456aa91b2a1330
+  zh: ed35f6d1c725d16b
+/2026-10-30-in-kernel-task-identity/consequences:
+  en: 375e5ee77e598bec
+  zh: ee644124dc50ebf9
