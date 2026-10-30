@@ -33,9 +33,9 @@ func TestDeliverPostsJSONBatch(t *testing.T) {
 	u.Start(ctx)
 	u.Deliver(bus.Record{
 		Host:    "web-1",
-		Domain:  "cpu",
+		Domain:  "example",
 		At:      time.Unix(1700000000, 0).UTC(),
-		Payload: map[string]any{"Seq": float64(7)},
+		Payload: map[string]any{"value": float64(7)},
 	})
 
 	select {
@@ -44,7 +44,7 @@ func TestDeliverPostsJSONBatch(t *testing.T) {
 		if err := json.Unmarshal(body, &batch); err != nil {
 			t.Fatal(err)
 		}
-		if len(batch) != 1 || batch[0]["host"] != "web-1" || batch[0]["domain"] != "cpu" {
+		if len(batch) != 1 || batch[0]["host"] != "web-1" || batch[0]["domain"] != "example" {
 			t.Fatalf("batch %#v", batch)
 		}
 	case <-time.After(2 * time.Second):

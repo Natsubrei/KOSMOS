@@ -15,9 +15,9 @@ func TestDeliverWritesOneJSONLine(t *testing.T) {
 
 	r.Deliver(bus.Record{
 		Host:    "web-1",
-		Domain:  "cpu",
+		Domain:  "example",
 		At:      time.Unix(1700000000, 0).UTC(),
-		Payload: struct{ Seq int64 }{Seq: 7},
+		Payload: struct{ Value int64 }{Value: 7},
 	})
 
 	line := strings.TrimSuffix(buf.String(), "\n")
@@ -26,9 +26,9 @@ func TestDeliverWritesOneJSONLine(t *testing.T) {
 	}
 	for _, want := range []string{
 		`"host":"web-1"`,
-		`"domain":"cpu"`,
+		`"domain":"example"`,
 		`"at":"2023-11-14T22:13:20Z"`,
-		`"payload":{"Seq":7}`,
+		`"payload":{"Value":7}`,
 	} {
 		if !strings.Contains(line, want) {
 			t.Fatalf("line %q missing %q", line, want)

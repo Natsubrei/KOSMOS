@@ -6,13 +6,12 @@ package cpu
 // Domain keys every CPU-domain record on the record bus.
 const Domain = "cpu"
 
-// Tick is a placeholder record proving the collection chain end to end; the
-// scheduling records replace it once the eBPF probes land.
-type Tick struct {
-	// Seq increments once per emitted tick within the agent process.
-	Seq int64
-	// Pid, Tid, and Starttime name the emitting task so a Report can localize.
+// TaskRuntime is one task's on-CPU time after in-kernel aggregation over
+// one drain interval. Pid is the thread-group id; Tid is the thread id;
+// Starttime is /proc/<tid>/stat field 22 so PID reuse does not alias.
+type TaskRuntime struct {
 	Pid       int32
 	Tid       int32
 	Starttime uint64
+	OnCPUNs   uint64
 }

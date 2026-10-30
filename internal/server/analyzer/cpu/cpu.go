@@ -4,6 +4,8 @@
 package cpu
 
 import (
+	"fmt"
+	"sort"
 	"time"
 
 	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
@@ -13,20 +15,21 @@ import (
 
 const (
 	name      = "cpu"
-	kind      = "cpu.tick"
-	evKind    = "cpu.tick-count"
-	tickBound = 0.0
+	kind      = "cpu.on-cpu"
+	evKind    = "cpu.on-cpu-ns"
+	defaultNs = uint64(1e9) // 1s of on-CPU time in the Window
 )
 
-// Analyzer emits a Report when a Window contains at least one cpu.Tick that
-// names a task. The comparison is count > 0.
+// Analyzer emits one Report per task whose summed OnCPUNs in the Window
+// exceeds the bound. Evidence cites the Window and keeps the sum in payload.
 type Analyzer struct {
-	now func() time.Time
+	now   func() time.Time
+	bound uint64
 }
 
 // New returns the CPU analyzer.
 func New() *Analyzer {
-	return &Analyzer{now: time.Now}
+	return &Analyzer{now: time.Now, bound: defaultNs}
 }
 
 // Name implements diagnose.Analyzer.
@@ -37,64 +40,70 @@ func (a *Analyzer) Domain() string { return cpucontracts.Domain }
 
 // Analyze implements diagnose.Analyzer.
 func (a *Analyzer) Analyze(w diagnose.Window, records []bus.Record) []diagnose.Report {
-	var ticks []bus.Record
-	var sub diagnose.Subject
+	// diagnose.Subject is the identity contract; grouping by any other shape
+	// would let the key drift from the Subject the Report claims.
+	sum := make(map[diagnose.Subject]uint64)
 	for _, r := range records {
-		t, ok := decodeTick(r.Payload)
+		t, ok := decodeRuntime(r.Payload)
 		if !ok || t.Pid == 0 {
 			continue
 		}
-		if sub.Pid == 0 {
-			sub = diagnose.Subject{Host: w.Host, Pid: t.Pid, Tid: t.Tid, Starttime: t.Starttime}
+		k := diagnose.Subject{Host: w.Host, Pid: t.Pid, Tid: t.Tid, Starttime: t.Starttime}
+		sum[k] += t.OnCPUNs
+	}
+	keys := make([]diagnose.Subject, 0, len(sum))
+	for k, ns := range sum {
+		if ns > a.bound {
+			keys = append(keys, k)
 		}
-		ticks = append(ticks, r)
 	}
-	if len(ticks) == 0 {
-		return nil
-	}
-	n := float64(len(ticks))
-	cites := []diagnose.Citation{{
-		Window: &diagnose.WindowCite{ID: w.ID, Start: w.Start, End: w.End},
-	}}
-	for _, r := range ticks {
-		cites = append(cites, diagnose.Citation{Record: &diagnose.RecordSnap{
-			Domain: r.Domain, At: r.At, Payload: r.Payload,
-		}})
-	}
-	return []diagnose.Report{{
-		ID:         w.ID + "/" + name,
-		ProducedAt: a.now(),
-		Host:       w.Host,
-		Analyzer:   name,
-		Window:     w,
-		Conclusion: diagnose.Conclusion{
-			Kind:    kind,
-			Subject: sub,
-			Stance:  diagnose.StanceHolds,
-		},
-		Evidence: []diagnose.Evidence{{
-			ID:      "e1",
-			Kind:    evKind,
-			Payload: map[string]any{"count": n},
-			Predicate: &diagnose.Predicate{
-				Observed: n,
-				Operator: diagnose.OpGT,
-				Bound:    tickBound,
+	sort.Slice(keys, func(i, j int) bool {
+		if keys[i].Pid != keys[j].Pid {
+			return keys[i].Pid < keys[j].Pid
+		}
+		if keys[i].Tid != keys[j].Tid {
+			return keys[i].Tid < keys[j].Tid
+		}
+		return keys[i].Starttime < keys[j].Starttime
+	})
+	out := make([]diagnose.Report, 0, len(keys))
+	for _, k := range keys {
+		ns := float64(sum[k])
+		out = append(out, diagnose.Report{
+			ID:         fmt.Sprintf("%s/%s/%d/%d/%d", w.ID, name, k.Pid, k.Tid, k.Starttime),
+			ProducedAt: a.now(),
+			Host:       w.Host,
+			Analyzer:   name,
+			Window:     w,
+			Conclusion: diagnose.Conclusion{
+				Kind:    kind,
+				Subject: k,
+				Stance:  diagnose.StanceHolds,
 			},
-			Citations: cites,
-		}},
-	}}
+			Evidence: []diagnose.Evidence{{
+				ID:      "e1",
+				Kind:    evKind,
+				Payload: map[string]any{"on_cpu_ns": ns},
+				Predicate: &diagnose.Predicate{
+					Observed: ns,
+					Operator: diagnose.OpGT,
+					Bound:    float64(a.bound),
+				},
+				Citations: []diagnose.Citation{{
+					Window: &diagnose.WindowCite{ID: w.ID, Start: w.Start, End: w.End},
+				}},
+			}},
+		})
+	}
+	return out
 }
 
-func decodeTick(payload any) (cpucontracts.Tick, bool) {
+func decodeRuntime(payload any) (cpucontracts.TaskRuntime, bool) {
 	switch p := payload.(type) {
-	case cpucontracts.Tick:
+	case cpucontracts.TaskRuntime:
 		return p, true
 	case map[string]any:
-		var t cpucontracts.Tick
-		if v, ok := asInt64(p["Seq"]); ok {
-			t.Seq = v
-		}
+		var t cpucontracts.TaskRuntime
 		if v, ok := asInt64(p["Pid"]); ok {
 			t.Pid = int32(v)
 		}
@@ -104,9 +113,12 @@ func decodeTick(payload any) (cpucontracts.Tick, bool) {
 		if v, ok := asUint64(p["Starttime"]); ok {
 			t.Starttime = v
 		}
+		if v, ok := asUint64(p["OnCPUNs"]); ok {
+			t.OnCPUNs = v
+		}
 		return t, true
 	default:
-		return cpucontracts.Tick{}, false
+		return cpucontracts.TaskRuntime{}, false
 	}
 }
 

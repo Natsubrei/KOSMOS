@@ -9,51 +9,68 @@ import (
 	"github.com/natsubrei/kosmos/internal/server/diagnose"
 )
 
-func TestAnalyzeHoldsOnTicks(t *testing.T) {
-	a := New()
-	a.now = func() time.Time { return time.Unix(50, 0).UTC() }
-	w := diagnose.Window{
+func window() diagnose.Window {
+	return diagnose.Window{
 		ID:    "web-1/0/10",
 		Host:  "web-1",
 		Start: time.Unix(0, 0).UTC(),
 		End:   time.Unix(10, 0).UTC(),
 	}
-	recs := []bus.Record{{
-		Host: "web-1", Domain: cpucontracts.Domain, At: time.Unix(5, 0).UTC(),
-		Payload: cpucontracts.Tick{Seq: 1, Pid: 42, Tid: 42, Starttime: 7},
-	}}
+}
+
+func TestAnalyzeGroupsBySubjectAndCitesWindow(t *testing.T) {
+	a := New()
+	a.now = func() time.Time { return time.Unix(50, 0).UTC() }
+	a.bound = 100
+	w := window()
+	recs := []bus.Record{
+		{
+			Host: "web-1", Domain: cpucontracts.Domain, At: time.Unix(1, 0).UTC(),
+			Payload: cpucontracts.TaskRuntime{Pid: 42, Tid: 42, Starttime: 7, OnCPUNs: 80},
+		},
+		{
+			Host: "web-1", Domain: cpucontracts.Domain, At: time.Unix(2, 0).UTC(),
+			Payload: cpucontracts.TaskRuntime{Pid: 42, Tid: 42, Starttime: 7, OnCPUNs: 40},
+		},
+		{
+			Host: "web-1", Domain: cpucontracts.Domain, At: time.Unix(3, 0).UTC(),
+			Payload: cpucontracts.TaskRuntime{Pid: 9, Tid: 9, Starttime: 1, OnCPUNs: 50},
+		},
+	}
 	got := a.Analyze(w, recs)
 	if len(got) != 1 {
-		t.Fatalf("reports %d", len(got))
+		t.Fatalf("reports %d, want 1 (pid 9 is under bound)", len(got))
 	}
 	r := got[0]
-	if r.Analyzer != "cpu" || r.Host != "web-1" || r.ID != "web-1/0/10/cpu" {
-		t.Fatalf("report %+v", r)
-	}
-	if r.Conclusion.Kind != "cpu.tick" || r.Conclusion.Stance != diagnose.StanceHolds {
+	if r.Conclusion.Kind != "cpu.on-cpu" || r.Conclusion.Stance != diagnose.StanceHolds {
 		t.Fatalf("conclusion %+v", r.Conclusion)
 	}
 	if r.Conclusion.Subject != (diagnose.Subject{Host: "web-1", Pid: 42, Tid: 42, Starttime: 7}) {
 		t.Fatalf("subject %+v", r.Conclusion.Subject)
 	}
-	if len(r.Evidence) != 1 || r.Evidence[0].Kind != "cpu.tick-count" {
+	if r.ID != "web-1/0/10/cpu/42/42/7" {
+		t.Fatalf("id %q", r.ID)
+	}
+	if len(r.Evidence) != 1 || r.Evidence[0].Kind != "cpu.on-cpu-ns" {
 		t.Fatalf("evidence %+v", r.Evidence)
 	}
 	p := r.Evidence[0].Predicate
-	if p == nil || p.Observed != 1 || p.Operator != diagnose.OpGT || p.Bound != 0 {
+	if p == nil || p.Observed != 120 || p.Operator != diagnose.OpGT || p.Bound != 100 {
 		t.Fatalf("predicate %+v", p)
 	}
-	if len(r.Evidence[0].Citations) != 2 {
-		t.Fatalf("citations %d", len(r.Evidence[0].Citations))
+	if len(r.Evidence[0].Citations) != 1 || r.Evidence[0].Citations[0].Window == nil {
+		t.Fatalf("citations %+v", r.Evidence[0].Citations)
 	}
 }
 
 func TestAnalyzeDecodesJSONPayload(t *testing.T) {
 	a := New()
-	w := diagnose.Window{ID: "h/0/10", Host: "h", Start: time.Unix(0, 0).UTC(), End: time.Unix(10, 0).UTC()}
-	got := a.Analyze(w, []bus.Record{{
-		Host: "h", Domain: cpucontracts.Domain, At: time.Unix(1, 0).UTC(),
-		Payload: map[string]any{"Seq": float64(3), "Pid": float64(9), "Tid": float64(9), "Starttime": float64(1)},
+	a.bound = 0
+	got := a.Analyze(window(), []bus.Record{{
+		Host: "web-1", Domain: cpucontracts.Domain, At: time.Unix(1, 0).UTC(),
+		Payload: map[string]any{
+			"Pid": float64(9), "Tid": float64(9), "Starttime": float64(1), "OnCPUNs": float64(2),
+		},
 	}})
 	if len(got) != 1 || got[0].Conclusion.Subject.Pid != 9 {
 		t.Fatalf("got %+v", got)
@@ -62,11 +79,30 @@ func TestAnalyzeDecodesJSONPayload(t *testing.T) {
 
 func TestAnalyzeSkipsEmptyAndPidZero(t *testing.T) {
 	a := New()
-	w := diagnose.Window{ID: "h/0/10", Host: "h", Start: time.Unix(0, 0).UTC(), End: time.Unix(10, 0).UTC()}
-	if got := a.Analyze(w, nil); got != nil {
+	a.bound = 0
+	w := window()
+	if got := a.Analyze(w, nil); got != nil && len(got) != 0 {
 		t.Fatalf("empty: %+v", got)
 	}
-	if got := a.Analyze(w, []bus.Record{{Payload: cpucontracts.Tick{Seq: 1}}}); got != nil {
+	if got := a.Analyze(w, []bus.Record{{Payload: cpucontracts.TaskRuntime{OnCPUNs: 9}}}); len(got) != 0 {
 		t.Fatalf("pid 0: %+v", got)
+	}
+}
+
+func TestAnalyzeTwoSubjectsTwoReports(t *testing.T) {
+	a := New()
+	a.bound = 0
+	got := a.Analyze(window(), []bus.Record{
+		{Payload: cpucontracts.TaskRuntime{Pid: 2, Tid: 2, Starttime: 1, OnCPUNs: 1}},
+		{Payload: cpucontracts.TaskRuntime{Pid: 1, Tid: 1, Starttime: 1, OnCPUNs: 1}},
+	})
+	if len(got) != 2 {
+		t.Fatalf("reports %d", len(got))
+	}
+	if got[0].Conclusion.Subject.Pid != 1 || got[1].Conclusion.Subject.Pid != 2 {
+		t.Fatalf("order %+v %+v", got[0].Conclusion.Subject, got[1].Conclusion.Subject)
+	}
+	if got[0].ID == got[1].ID {
+		t.Fatalf("duplicate id %q", got[0].ID)
 	}
 }

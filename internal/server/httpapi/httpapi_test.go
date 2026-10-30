@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
 	"github.com/natsubrei/kosmos/internal/bus"
 	"github.com/natsubrei/kosmos/internal/server/diagnose"
 	"github.com/natsubrei/kosmos/internal/server/store"
@@ -22,12 +21,12 @@ func (s staticReports) ListReports() []diagnose.Report { return s }
 func TestPostThenGetRoundTrip(t *testing.T) {
 	b := bus.New()
 	st := store.NewMemory()
-	b.Subscribe(cpucontracts.Domain, st)
+	b.Subscribe("example", st)
 	srv := httptest.NewServer(Handler(b, st, staticReports{}))
 	t.Cleanup(srv.Close)
 
 	req, err := http.NewRequest(http.MethodPost, srv.URL+"/records", strings.NewReader(
-		`[{"host":"web-1","domain":"cpu","at":"2023-11-14T22:13:20Z","payload":{"Seq":7}}]`,
+		`[{"host":"web-1","domain":"example","at":"2023-11-14T22:13:20Z","payload":{"value":7}}]`,
 	))
 	if err != nil {
 		t.Fatal(err)
@@ -61,11 +60,11 @@ func TestPostThenGetRoundTrip(t *testing.T) {
 	if err := json.NewDecoder(gres.Body).Decode(&got); err != nil {
 		t.Fatal(err)
 	}
-	if len(got) != 1 || got[0]["host"] != "web-1" || got[0]["domain"] != "cpu" {
+	if len(got) != 1 || got[0]["host"] != "web-1" || got[0]["domain"] != "example" {
 		t.Fatalf("got %#v", got)
 	}
 	payload, ok := got[0]["payload"].(map[string]any)
-	if !ok || payload["Seq"] != float64(7) {
+	if !ok || payload["value"] != float64(7) {
 		t.Fatalf("payload %#v", got[0]["payload"])
 	}
 }
@@ -73,12 +72,12 @@ func TestPostThenGetRoundTrip(t *testing.T) {
 func TestPostRejectsMissingHost(t *testing.T) {
 	b := bus.New()
 	st := store.NewMemory()
-	b.Subscribe(cpucontracts.Domain, st)
+	b.Subscribe("example", st)
 	srv := httptest.NewServer(Handler(b, st, staticReports{}))
 	t.Cleanup(srv.Close)
 
 	req, err := http.NewRequest(http.MethodPost, srv.URL+"/records", strings.NewReader(
-		`[{"domain":"cpu","at":"2023-11-14T22:13:20Z","payload":{"Seq":7}}]`,
+		`[{"domain":"example","at":"2023-11-14T22:13:20Z","payload":{"value":7}}]`,
 	))
 	if err != nil {
 		t.Fatal(err)
@@ -127,14 +126,14 @@ func TestGetReportsRoundTrip(t *testing.T) {
 			Start: time.Unix(0, 0).UTC(), End: time.Unix(10, 0).UTC(),
 		},
 		Conclusion: diagnose.Conclusion{
-			Kind:    "cpu.tick",
+			Kind:    "example.claim",
 			Subject: diagnose.Subject{Host: "web-1", Pid: 42, Tid: 42},
 			Stance:  diagnose.StanceHolds,
 		},
 		Evidence: []diagnose.Evidence{{
 			ID:      "e1",
-			Kind:    "cpu.tick-count",
-			Payload: map[string]any{"count": float64(1)},
+			Kind:    "example.measure",
+			Payload: map[string]any{"value": float64(1)},
 			Predicate: &diagnose.Predicate{
 				Observed: 1, Operator: diagnose.OpGT, Bound: 0,
 			},
@@ -143,7 +142,7 @@ func TestGetReportsRoundTrip(t *testing.T) {
 					ID: "web-1/0/10", Start: time.Unix(0, 0).UTC(), End: time.Unix(10, 0).UTC(),
 				}},
 				{Record: &diagnose.RecordSnap{
-					Domain: "cpu", At: time.Unix(5, 0).UTC(), Payload: map[string]any{"Seq": float64(1)},
+					Domain: "example", At: time.Unix(5, 0).UTC(), Payload: map[string]any{"value": float64(1)},
 				}},
 			},
 		}},
@@ -173,7 +172,7 @@ func TestGetReportsRoundTrip(t *testing.T) {
 		t.Fatalf("got %#v", got)
 	}
 	con, ok := got[0]["conclusion"].(map[string]any)
-	if !ok || con["kind"] != "cpu.tick" || con["stance"] != "holds" {
+	if !ok || con["kind"] != "example.claim" || con["stance"] != "holds" {
 		t.Fatalf("conclusion %#v", got[0]["conclusion"])
 	}
 }
