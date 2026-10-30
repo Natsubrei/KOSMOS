@@ -1,7 +1,8 @@
-// Command server receives Records over HTTP JSON and lists them.
+// Command server receives Records over HTTP JSON, runs Analyzers, and lists Records and Reports.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -9,7 +10,9 @@ import (
 
 	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
 	"github.com/natsubrei/kosmos/internal/bus"
+	cpuanalyzer "github.com/natsubrei/kosmos/internal/server/analyzer/cpu"
 	"github.com/natsubrei/kosmos/internal/server/control"
+	"github.com/natsubrei/kosmos/internal/server/diagnose"
 	"github.com/natsubrei/kosmos/internal/server/httpapi"
 	"github.com/natsubrei/kosmos/internal/server/store"
 )
@@ -38,7 +41,9 @@ func run(listen string) error {
 	b := bus.New()
 	st := store.NewMemory()
 	b.Subscribe(cpucontracts.Domain, st)
+	loop := diagnose.New(st, []diagnose.Analyzer{cpuanalyzer.New()})
+	go loop.Run(context.Background())
 	hub := control.NewHub(func(string) []string { return []string{cpucontracts.Domain} })
 	fmt.Fprintf(os.Stderr, "server: listening on %s\n", listen)
-	return http.ListenAndServe(listen, route(httpapi.Handler(b, st), hub.Handler()))
+	return http.ListenAndServe(listen, route(httpapi.Handler(b, st, loop), hub.Handler()))
 }

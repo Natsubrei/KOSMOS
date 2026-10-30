@@ -5,6 +5,7 @@ package cpu
 
 import (
 	"errors"
+	"os"
 	"time"
 
 	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
@@ -62,7 +63,8 @@ func (b *Bundle) loop() {
 			return
 		case <-ticker.C:
 			seq++
-			b.h.Emit(cpucontracts.Tick{Seq: seq})
+			pid := int32(os.Getpid())
+			b.h.Emit(cpucontracts.Tick{Seq: seq, Pid: pid, Tid: pid})
 		}
 	}
 }

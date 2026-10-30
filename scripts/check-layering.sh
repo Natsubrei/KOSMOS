@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Layering gate for compile-time domain bundles: contracts are pure types (stdlib only), domain
-# bundles never import sibling domains, and packages under internal/agent except domain/
-# import no domain — domain knowledge reaches
-# the process only by registration in cmd/. Test files are included via
-# go list -deps -test. Violations print one line each and exit nonzero.
+# Layering gate for compile-time domain bundles: contracts are pure types (stdlib only),
+# domain bundles never import sibling domains, analyzers never import sibling analyzers,
+# and domain-free packages under internal/{agent,server} import no domain/analyzer package
+# — domain knowledge reaches the process only by registration in cmd/. Test files are
+# included via go list -deps -test. Violations print one line each and exit nonzero.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -43,7 +43,26 @@ for p in $(go list ./internal/agent/...); do
   done < <(deps "$p" | grep -F "$module/internal/agent/domain/")
 done
 
+# Rule 4: an analyzer imports no sibling analyzer.
+for p in $(go list ./internal/server/analyzer/...); do
+  while IFS= read -r dep; do
+    printf 'layering: %s imports sibling analyzer %s\n' "$p" "$dep"
+    status=1
+  done < <(deps "$p" | grep -F "$module/internal/server/analyzer/" | grep -vxF "$p")
+done
+
+# Rule 5: packages under internal/server except analyzer/ import no analyzer.
+for p in $(go list ./internal/server/...); do
+  case "$p" in
+    "$module"/internal/server/analyzer/*) continue ;;
+  esac
+  while IFS= read -r dep; do
+    printf 'layering: %s imports analyzer %s — register in cmd/ instead\n' "$p" "$dep"
+    status=1
+  done < <(deps "$p" | grep -F "$module/internal/server/analyzer/")
+done
+
 if (( status == 0 )); then
-  echo "layering: OK (contracts pure, no sibling-domain imports, domain-free packages import no domain)"
+  echo "layering: OK (contracts pure, no sibling-domain or sibling-analyzer imports, domain-free packages import no domain)"
 fi
 exit "$status"

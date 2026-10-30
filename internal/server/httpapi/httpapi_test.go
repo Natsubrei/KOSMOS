@@ -7,17 +7,23 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	cpucontracts "github.com/natsubrei/kosmos/contracts/cpu"
 	"github.com/natsubrei/kosmos/internal/bus"
+	"github.com/natsubrei/kosmos/internal/server/diagnose"
 	"github.com/natsubrei/kosmos/internal/server/store"
 )
+
+type staticReports []diagnose.Report
+
+func (s staticReports) ListReports() []diagnose.Report { return s }
 
 func TestPostThenGetRoundTrip(t *testing.T) {
 	b := bus.New()
 	st := store.NewMemory()
 	b.Subscribe(cpucontracts.Domain, st)
-	srv := httptest.NewServer(Handler(b, st))
+	srv := httptest.NewServer(Handler(b, st, staticReports{}))
 	t.Cleanup(srv.Close)
 
 	req, err := http.NewRequest(http.MethodPost, srv.URL+"/records", strings.NewReader(
@@ -68,7 +74,7 @@ func TestPostRejectsMissingHost(t *testing.T) {
 	b := bus.New()
 	st := store.NewMemory()
 	b.Subscribe(cpucontracts.Domain, st)
-	srv := httptest.NewServer(Handler(b, st))
+	srv := httptest.NewServer(Handler(b, st, staticReports{}))
 	t.Cleanup(srv.Close)
 
 	req, err := http.NewRequest(http.MethodPost, srv.URL+"/records", strings.NewReader(
@@ -95,7 +101,7 @@ func TestPostRejectsMissingHost(t *testing.T) {
 func TestMissingUserUnauthorized(t *testing.T) {
 	b := bus.New()
 	st := store.NewMemory()
-	srv := httptest.NewServer(Handler(b, st))
+	srv := httptest.NewServer(Handler(b, st, staticReports{}))
 	t.Cleanup(srv.Close)
 
 	res, err := srv.Client().Get(srv.URL + "/records")
@@ -105,5 +111,69 @@ func TestMissingUserUnauthorized(t *testing.T) {
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusUnauthorized {
 		t.Fatalf("status %d", res.StatusCode)
+	}
+}
+
+func TestGetReportsRoundTrip(t *testing.T) {
+	b := bus.New()
+	st := store.NewMemory()
+	rep := diagnose.Report{
+		ID:         "web-1/0/10/cpu",
+		ProducedAt: time.Unix(50, 0).UTC(),
+		Host:       "web-1",
+		Analyzer:   "cpu",
+		Window: diagnose.Window{
+			ID: "web-1/0/10", Host: "web-1",
+			Start: time.Unix(0, 0).UTC(), End: time.Unix(10, 0).UTC(),
+		},
+		Conclusion: diagnose.Conclusion{
+			Kind:    "cpu.tick",
+			Subject: diagnose.Subject{Host: "web-1", Pid: 42, Tid: 42},
+			Stance:  diagnose.StanceHolds,
+		},
+		Evidence: []diagnose.Evidence{{
+			ID:      "e1",
+			Kind:    "cpu.tick-count",
+			Payload: map[string]any{"count": float64(1)},
+			Predicate: &diagnose.Predicate{
+				Observed: 1, Operator: diagnose.OpGT, Bound: 0,
+			},
+			Citations: []diagnose.Citation{
+				{Window: &diagnose.WindowCite{
+					ID: "web-1/0/10", Start: time.Unix(0, 0).UTC(), End: time.Unix(10, 0).UTC(),
+				}},
+				{Record: &diagnose.RecordSnap{
+					Domain: "cpu", At: time.Unix(5, 0).UTC(), Payload: map[string]any{"Seq": float64(1)},
+				}},
+			},
+		}},
+	}
+	srv := httptest.NewServer(Handler(b, st, staticReports{rep}))
+	t.Cleanup(srv.Close)
+
+	get, err := http.NewRequest(http.MethodGet, srv.URL+"/reports", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	get.Header.Set("X-User-Id", "dev")
+	res, err := srv.Client().Do(get)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(res.Body)
+		t.Fatalf("status %d body %s", res.StatusCode, body)
+	}
+	var got []map[string]any
+	if err := json.NewDecoder(res.Body).Decode(&got); err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 1 || got[0]["id"] != "web-1/0/10/cpu" || got[0]["analyzer"] != "cpu" {
+		t.Fatalf("got %#v", got)
+	}
+	con, ok := got[0]["conclusion"].(map[string]any)
+	if !ok || con["kind"] != "cpu.tick" || con["stance"] != "holds" {
+		t.Fatalf("conclusion %#v", got[0]["conclusion"])
 	}
 }

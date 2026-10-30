@@ -11,4 +11,8 @@ const Domain = "cpu"
 type Tick struct {
 	// Seq increments once per emitted tick within the agent process.
 	Seq int64
+	// Pid, Tid, and Starttime name the emitting task so a Report can localize.
+	Pid       int32
+	Tid       int32
+	Starttime uint64
 }
