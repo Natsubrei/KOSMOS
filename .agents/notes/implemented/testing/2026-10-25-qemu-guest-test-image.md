@@ -21,7 +21,7 @@ healthcheck-gated. BTF is checked on every boot and reported in the boot facts.
 
 `test/qemu/` holds the environment; its README is the usage surface.
 
-- `compose.yaml` runs two services: `qemu-guest` (QEMU inside a Debian
+- `compose.yaml` runs two services: `guest` (QEMU inside a Debian
   container, `/dev/kvm` and nothing else) and `server` (this repository's
   `cmd/server` binary, published on the host loopback for inspection).
 - `images.env` pins each image URL and the publisher's checksum; `entrypoint.sh`

@@ -26,5 +26,4 @@ Five places, then the gates; domain-free packages stay untouched
    code, and the gate stays.
 
 Records carry what survived in-kernel reduction; the wire budget is 10^5
-steady / 10^6 burst events/s/host (issue 0001). Placeholder records
-(`cpu.Tick`) prove the chain and are replaced when the probes land.
+steady / 10^6 burst events/s/host.

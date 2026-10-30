@@ -24,7 +24,7 @@ Every architectural decision for the rewrite settled, plus a walking skeleton pr
 
 <!-- one line per closed ticket, newest last -->
 
-- 0001 · CPU-scheduling collection constraints: baseline kernel 5.8, floor 4.9; in-kernel aggregation; protocol budget 10⁵–10⁶ events/s/host ([note](../.agents/notes/proposed/architecture/2026-10-25-cpu-sched-collection-constraints.md)).
+- 0001 · CPU-scheduling collection constraints: baseline kernel 5.8, floor 4.9; in-kernel aggregation; protocol budget 10⁵–10⁶ events/s/host ([note](../.agents/notes/implemented/architecture/2026-10-25-cpu-sched-collection-constraints.md)).
 - 0002 · QEMU guest image: openEuler 24.03 LTS, Ubuntu 24.04 fallback; unprivileged QEMU ([note](../.agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md)).
 - 0011 · Compile-time domain bundles over a zero-branch record bus ([note](../.agents/notes/implemented/architecture/2026-10-25-compile-time-domain-bundles.md)).
 - 0003 · Report is one Conclusion plus Evidence over one Window; Analyzers produce complete Reports ([note](../.agents/notes/implemented/architecture/2026-10-26-report-evidence-model.md)).
@@ -32,6 +32,7 @@ Every architectural decision for the rewrite settled, plus a walking skeleton pr
 - 0009 · QEMU test guest: `test/qemu/` boots openEuler 24.03 LTS unprivileged (13 s to SSH, BTF present) and proves an agent upload reaches the server ([note](../.agents/notes/implemented/testing/2026-10-25-qemu-guest-test-image.md)).
 - 0005 · In-process memory for Records and Reports; ingest does not diagnose; one ticker consumer cuts oldest closed Windows ([note](../.agents/notes/implemented/architecture/2026-10-27-storage-async-boundary.md)).
 - 0006 · Agent-outbound HTTP: `POST /records` plus a per-host control session; server enables domains; liveness is the session ([note](../.agents/notes/implemented/architecture/2026-10-27-agent-server-protocol.md)).
+- 0010 · Walking skeleton: the guest collects on-CPU time in-kernel from `sched_switch`, the server cuts 10s Windows, and `GET /reports` returns a Report about the exact stressed PID ([note](../.agents/notes/implemented/architecture/2026-10-25-cpu-sched-collection-constraints.md)); `test/qemu/smoke.sh` asserts the PID.
 
 ## Not yet specified
 

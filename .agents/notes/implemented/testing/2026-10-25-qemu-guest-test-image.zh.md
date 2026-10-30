@@ -16,7 +16,7 @@ eBPF 探针必须打在真实客户机内核上，且不给 agent 宿主机级�
 
 环境在 `test/qemu/`，用法看它的 README。
 
-- `compose.yaml` 跑两个服务：`qemu-guest`（Debian 容器里的 QEMU，只拿到 `/dev/kvm`）与 `server`（本仓库的 `cmd/server` 二进制，发布在宿主机回环上便于查看）。
+- `compose.yaml` 跑两个服务：`guest`（Debian 容器里的 QEMU，只拿到 `/dev/kvm`）与 `server`（本仓库的 `cmd/server` 二进制，发布在宿主机回环上便于查看）。
 - `images.env` 按 URL 与发布方校验和钉住镜像；`entrypoint.sh` 首次启动前校验，缓存 qcow2，每次启动都新建写时复制 overlay。
 - 用 `cloud-localds` 生成的 NoCloud seed 注入 runner 的 SSH 公钥并创建 `kosmos` 用户；`up.sh` 首次运行时生成该密钥。
 - agent 由 `push-agent.sh` 经 hostfwd 用 scp 投递，镜像里不带任何 agent 负载。
