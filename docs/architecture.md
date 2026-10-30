@@ -35,13 +35,19 @@ calls `Apply`; a dead session stops collection after a grace period.
 ## Server
 
 `internal/server/httpapi` turns request bytes into Records and publishes them;
-`GET /records` lists what the store kept. `internal/server/control` holds one
-session per `host` and sends the domain snapshot that host should run.
-`internal/server/store` keeps Records in process memory.
+`GET /records` lists what the store kept; `GET /reports` lists what diagnosis
+produced. `internal/server/control` holds one session per `host` and sends the
+domain snapshot that host should run. `internal/server/store` keeps Records in
+process memory.
 
-`cmd/server` is the only place that wires a domain key to the record bus and to
-the control snapshot, the way `cmd/agent` is the only place that registers a
-bundle.
+`internal/server/diagnose` is the diagnosis kit. It cuts 10-second Unix-UTC
+Windows and calls every registered `Analyzer`; an Analyzer is one Window of one
+domain's Records in, zero or more complete Reports out.
+`internal/server/analyzer/<domain>` is the package that implements that.
+
+`cmd/server` is the only place that wires a domain key to the record bus, the
+control snapshot, and an Analyzer, the way `cmd/agent` is the only place that
+registers a bundle.
 
 ## Seams
 
@@ -52,10 +58,12 @@ Each of these is the single place a variable concern is allowed to appear.
 | Wire format and transport | subscribers and receivers | `internal/agent/upload`, `internal/agent/control`, `internal/server/httpapi`, `internal/server/control` |
 | Record retention | `store.Store` | `internal/server/store` |
 | Collection lifecycle | `runtime.Collector`, `Agent.Apply` | `internal/agent/runtime` |
-| Which record kinds exist | the domain key plus a registration line | `contracts/`, `cmd/` |
+| Diagnosis | `diagnose.Analyzer`, `Loop` | `internal/server/diagnose` |
+| Which record kinds and analyzers exist | the domain key plus a registration line | `contracts/`, `internal/server/analyzer/<domain>`, `cmd/` |
 
-The record bus, the runtime kit, and `contracts/` import no transport and no
-domain. `scripts/check-layering.sh` enforces the domain half of that.
+The record bus, the runtime kit, the diagnosis kit, and `contracts/` import no
+transport and no domain. `scripts/check-layering.sh` enforces the domain half of
+that.
 
 ## Adding a collection domain
 
