@@ -7,14 +7,16 @@
 # at the sibling of their own locale. After editing either side, bring the
 # other along, then re-record:
 #   scripts/verify-translation-pair.sh --write docs/glossary.md
-#   scripts/verify-translation-pair.sh --cached docs/glossary.md
-# With no document arguments, every documented pair in scope is verified;
-# `--list` reports each in-scope document's state instead. `--staged` checks the
-# in-scope documents among the staged paths, reading all three files from the
-# index — that is what the pre-commit hook runs, so the scope rule lives only
-# here.
-# --cached reads both sides and the record from the index, so an unstaged edit
-# cannot pass a commit.
+#   scripts/verify-translation-pair.sh docs/glossary.md
+# With no document arguments, every documented pair in scope is verified
+# against the index — membership and content — so an untracked counterpart
+# cannot fill a hole and a worktree deletion cannot false-red a still-tracked
+# pair. That is what CI runs. `--cached` is the same plane for explicit paths.
+# `--staged` checks the in-scope documents among the staged paths, reading all
+# three files from the index — that is what the pre-commit hook runs, so the
+# scope rule lives only here.
+# `--write` and an explicit path without `--cached` read the worktree, so an
+# author can record and check a pair before staging it.
 # Sections pair positionally; keys come from the English headings, so
 # translated Chinese headings do not break the record. Translation quality,
 # terminology, and punctuation are review's job; this script does not scan them.
@@ -22,6 +24,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 manifest=scripts/pairing-exclusions.txt
+root=$(pwd)
 
 write=0
 cached=0
@@ -51,13 +54,21 @@ if (( cached && write )); then
   printf 'verify-translation-pair: --cached and --write are exclusive\n' >&2
   exit 2
 fi
-if (( cached )); then
-  tmpdir=$(mktemp -d)
-  trap 'rm -rf "$tmpdir"' EXIT
-fi
+
+# index_has <path>: the path names a blob in the index, not the worktree.
+index_has() {
+  git cat-file -e ":$1" 2>/dev/null
+}
+
+ensure_tmpdir() {
+  if [[ -z ${tmpdir:-} ]]; then
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+  fi
+}
 
 # in_scope <path>: the documentation corpus that must be bilingual. Everything
-# else — skills, agent instructions, the temporary issue tracker — is outside.
+# else — skills, agent instructions — is outside.
 in_scope() {
   case "$1" in
     README.md | docs/*.md | .agents/notes/*.md | test/*.md) return 0 ;;
@@ -83,13 +94,14 @@ pairing_excluded() {
   return 1
 }
 
-# pair_state <doc>: complete, missing, or orphan-zh.
+# pair_state <doc>: complete or missing, against the index — the same plane
+# --list enumerates.
 pair_state() {
   local doc=$1
-  [[ -f $doc && -f ${doc%.md}.zh.md && -f ${doc%.md}.i18n.yaml ]] && {
+  if index_has "$doc" && index_has "${doc%.md}.zh.md" && index_has "${doc%.md}.i18n.yaml"; then
     echo complete
     return
-  }
+  fi
   echo missing
 }
 
@@ -133,7 +145,9 @@ if ((staged_only)); then
 fi
 if ((!write && ${#docs[@]} == 0)); then
   # Scope enumeration, not a sidecar search: a document that was never
-  # recorded is still required to have its counterpart.
+  # recorded is still required to have its counterpart. The plane is the
+  # index, matching verify-md-links.sh and verify-index-build.sh.
+  cached=1
   while IFS= read -r path; do
     docs+=("$path")
   done < <(
@@ -206,9 +220,9 @@ sections_of() {
 status=0
 
 # A Chinese side without its English anchor is invisible to a scope walk over
-# `*.md`, so it gets its own pass.
+# `*.md`, so it gets its own pass. Both names are index paths.
 while IFS= read -r zh_path; do
-  [[ -f ${zh_path%.zh.md}.md ]] && continue
+  index_has "${zh_path%.zh.md}.md" && continue
   printf 'verify-translation-pair: %s: Chinese side without an English anchor\n' "$zh_path" >&2
   status=1
 done < <(git ls-files '*.zh.md' | while IFS= read -r path; do
@@ -217,8 +231,9 @@ done < <(git ls-files '*.zh.md' | while IFS= read -r path; do
   printf '%s\n' "$path"
 done | sort)
 
-# links_of <file>: `line<TAB>target` for every relative Markdown link outside
-# fenced code. The language switcher is the one line allowed to cross locales.
+# links_of: stdin is markdown; emit `line<TAB>target` for every relative
+# Markdown link outside fenced code. The language switcher is the one line
+# allowed to cross locales.
 links_of() {
   awk '
     /^```/ { fence = !fence; next }
@@ -234,13 +249,33 @@ links_of() {
         line = substr(line, RSTART + RLENGTH)
       }
     }
-  ' "$1"
+  '
+}
+
+# file_bytes <path>: the pair's bytes in the plane this invocation verifies.
+file_bytes() {
+  if (( cached )); then
+    git show ":$1"
+  else
+    cat "$1"
+  fi
+}
+
+# sibling_exists <repo-relative-path>: the zh counterpart the locale rule
+# would demand, in the same plane as the link text.
+sibling_exists() {
+  if (( cached )); then
+    index_has "$1"
+  else
+    [[ -e "$1" ]]
+  fi
 }
 
 # check_locale_links <en> <zh>: a Chinese side links the Chinese sibling when
-# the pair has one, and an English side never links the Chinese one.
+# the pair has one, and an English side never links the Chinese one. Paths are
+# repo-relative; content comes from the active plane.
 check_locale_links() {
-  local en=$1 zh=$2 src dir line target path want
+  local en=$1 zh=$2 src dir line target path want sibling
   for src in "$en" "$zh"; do
     dir=$(dirname "$src")
     while IFS=$'\t' read -r line target; do
@@ -257,7 +292,8 @@ check_locale_links() {
             *.md) ;;
             *) continue ;;
           esac
-          [[ -e "$dir/${path%.md}.zh.md" ]] || continue
+          sibling=$(realpath -m --relative-to="$root" "$dir/${path%.md}.zh.md")
+          sibling_exists "$sibling" || continue
           want=${path%.md}.zh.md
           ;;
         *)
@@ -271,15 +307,16 @@ check_locale_links() {
       printf 'verify-translation-pair: %s:%s: link target %s uses the wrong locale; expected %s\n' \
         "$src" "$line" "$target" "$want" >&2
       status=1
-    done < <(links_of "$src")
+    done < <(file_bytes "$src" | links_of)
   done
 }
 
-# index_copy <path>: copy the staged blob for path into $tmpdir under its own
+# index_copy <path>: copy the index blob for path into $tmpdir under its own
 # basename (section keys derive from the filename). Returns 1 when the index
 # has no such path.
 index_copy() {
   local path=$1
+  ensure_tmpdir
   git cat-file -e ":$path" 2>/dev/null || return 1
   git show ":$path" > "$tmpdir/$(basename "$path")"
 }
@@ -289,10 +326,11 @@ for doc in "${docs[@]}"; do
   zh="${doc%.md}.zh.md"
   record="${doc%.md}.i18n.yaml"
 
-  # Link locale is resolved against real paths, so it reads the worktree copy
-  # even under --cached; a staged tree that disagrees with the worktree is the
-  # commit's own problem, not this check's.
-  if [[ -f $en && -f $zh ]]; then
+  if (( cached )); then
+    if index_has "$en" && index_has "$zh"; then
+      check_locale_links "$en" "$zh"
+    fi
+  elif [[ -f $en && -f $zh ]]; then
     check_locale_links "$en" "$zh"
   fi
 
@@ -300,7 +338,7 @@ for doc in "${docs[@]}"; do
   if (( cached )); then
     for f in "$en" "$zh"; do
       if ! index_copy "$f"; then
-        printf 'verify-translation-pair: %s: %s is not staged\n' "$doc" "$f" >&2
+        printf 'verify-translation-pair: %s: %s is not in the index\n' "$doc" "$f" >&2
         missing=1
       fi
     done
@@ -346,7 +384,7 @@ for doc in "${docs[@]}"; do
   fi
 
   if [[ ! -f $record ]]; then
-    printf 'verify-translation-pair: %s: no record at %s; run --write after confirming the pair\n' "$doc" "$record" >&2
+    printf 'verify-translation-pair: %s: no record at %s; run --write after confirming the pair\n' "$doc" "${doc%.md}.i18n.yaml" >&2
     status=1
     continue
   fi
@@ -373,7 +411,7 @@ for doc in "${docs[@]}"; do
       printf 'verify-translation-pair: %s: section %s EN drift — sync the pair, then --write\n' "$doc" "$key" >&2
       doc_status=1
     elif [[ ${zh_h[i]} != ${rec_zh[$key]:-} ]]; then
-      printf 'verify-translation-pair: %s: section %s ZH drift — bring %s along, then --write\n' "$doc" "$key" "$zh" >&2
+      printf 'verify-translation-pair: %s: section %s ZH drift — bring %s along, then --write\n' "$doc" "$key" "${doc%.md}.zh.md" >&2
       doc_status=1
     fi
   done

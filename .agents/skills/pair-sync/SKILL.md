@@ -26,14 +26,17 @@ names it. Both sides and the record move in the same change;
    locale — the Chinese side points at `.zh.md` — except the language switcher
    line, which is what crosses over.
 3. Re-record the resource: `bash scripts/verify-translation-pair.sh --write <doc>`.
-4. Corpus green: `bash scripts/verify-translation-pair.sh` (no arguments walks
-   the whole corpus and reports every missing counterpart). A red line means
-   step 2 missed a side — fix the pair, then re-record.
+4. Worktree green: `bash scripts/verify-translation-pair.sh <doc>` reads the
+   files just written. Corpus green: `bash scripts/verify-translation-pair.sh`
+   with no arguments walks the index — membership and content — so an untracked
+   counterpart cannot fill a hole. A red line means step 2 missed a side — fix
+   the pair, then re-record. Stage the three files before treating no-arg as
+   the last word.
 
 ## Reference
 
 - `bash scripts/verify-translation-pair.sh --list` prints one state per in-scope
-  document; a new document shows `missing` until all three files exist.
+  document; a new document shows `missing` until all three files are in the index.
 - A document outside the corpus needs no pair. Putting one there and skipping
   the record is the failure the scope rule exists to catch.
 - Do not run a whole-line punctuation converter over `.zh.md`; it rewrites
