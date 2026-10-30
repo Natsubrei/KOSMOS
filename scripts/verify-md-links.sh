@@ -43,7 +43,9 @@ for doc in $(git ls-files '*.md'); do
     [[ -z $path ]] && continue
     normalized=$(realpath -m --relative-to="$root" "$dir/$path")
     if [[ -z ${present[$normalized]:-} && -z ${dirs[$normalized]:-} ]]; then
-      printf 'verify-md-links: %s: %s does not exist\n' "$file" "$target"
+      # Index plane: a file that exists on disk but was never staged is a real
+      # dangling link in the commit, and the message has to say so.
+      printf 'verify-md-links: %s: %s is not in the index (git add it if it exists on disk)\n' "$file" "$target"
       status=1
     fi
   done < <(printf '%s\n' "$content" | awk -v file="$doc" '

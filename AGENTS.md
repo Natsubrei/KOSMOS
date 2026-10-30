@@ -15,6 +15,7 @@ Read [docs/architecture.md](docs/architecture.md) before changing a seam: it map
 ## Development
 
 - `scripts/check.sh` is the full gate — formatting, vet, an index build, tests, layering, shell syntax, Agent Note structure, bilingual pairs, Markdown links — and is what CI runs. The pre-commit hook checks only what matches the staged files; pre-push runs the tests. `scripts/verify-index-build.sh` builds the index, so a file the build reads but nobody staged fails locally instead of in CI.
+- `scripts/test-gates.sh` is the gates' own negative controls: each one must turn red on its own breakage and green again. It runs in CI; run it after touching anything under `scripts/`.
 - Evidence does not survive a history rewrite: after a rebase or forced push, re-run the affected checks before treating the branch as verified.
 - Push rewritten branches with `--force-with-lease` and abort on remote movement; raw `--force` is forbidden.
 - Report only the commands actually run; never claim a check that was not executed.

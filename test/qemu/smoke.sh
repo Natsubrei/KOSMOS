@@ -31,7 +31,15 @@ while (( SECONDS < deadline )); do
   body=$(curl -fsS -H 'X-User-Id: smoke' "http://127.0.0.1:$server_port/reports" || true)
   if printf '%s' "$body" | grep -q "\"pid\":$hog_pid,"; then
     echo "smoke: OK — the report localizes to PID $hog_pid"
-    printf '%s\n' "$body" | python3 -m json.tool 2>/dev/null || printf '%s\n' "$body"
+    # Only the matching Report: dumping every Report buries the proof and costs
+    # far more context than the run is worth.
+    printf '%s' "$body" | python3 -c '
+import json, sys
+reports = json.load(sys.stdin)
+for r in reports:
+    if r.get("conclusion", {}).get("subject", {}).get("pid") == int(sys.argv[1]):
+        print(json.dumps(r, indent=2))
+' "$hog_pid"
     cat "$state/run/facts"
     exit 0
   fi
