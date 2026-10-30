@@ -6,6 +6,7 @@ package diagnose
 
 import (
 	"context"
+	"sort"
 	"strconv"
 	"sync"
 	"time"
@@ -29,7 +30,7 @@ type Analyzer interface {
 	Analyze(w Window, records []bus.Record) []Report
 }
 
-// Loop is the single diagnosis consumer. Each Tick cuts the oldest closed
+// Loop is the single diagnosis consumer. Each Tick drains every closed
 // undiagnosed Window, runs every Analyzer, and marks the interval diagnosed
 // even when no Report is produced.
 type Loop struct {
@@ -67,22 +68,20 @@ func (l *Loop) Run(ctx context.Context) {
 	}
 }
 
-// Tick cuts at most one Window. Tests call it directly with a frozen now.
+// Tick drains every closed undiagnosed Window. Tests call it with a frozen now.
 func (l *Loop) Tick() {
 	now := l.now()
 	recs := l.st.List()
-	w, ok := l.nextWindow(recs, now)
-	if !ok {
-		return
+	for _, w := range l.dueWindows(recs, now) {
+		var produced []Report
+		for _, az := range l.az {
+			produced = append(produced, az.Analyze(w, filter(recs, w, az.Domain()))...)
+		}
+		l.mu.Lock()
+		l.diagnosed[w.ID] = struct{}{}
+		l.reports = append(l.reports, produced...)
+		l.mu.Unlock()
 	}
-	var produced []Report
-	for _, az := range l.az {
-		produced = append(produced, az.Analyze(w, filter(recs, w, az.Domain()))...)
-	}
-	l.mu.Lock()
-	l.diagnosed[w.ID] = struct{}{}
-	l.reports = append(l.reports, produced...)
-	l.mu.Unlock()
 }
 
 // ListReports returns a copy of the Reports produced so far.
@@ -94,13 +93,12 @@ func (l *Loop) ListReports() []Report {
 	return out
 }
 
-func (l *Loop) nextWindow(recs []bus.Record, now time.Time) (Window, bool) {
+func (l *Loop) dueWindows(recs []bus.Record, now time.Time) []Window {
 	lastEnd := tileStart(now)
 	hosts := hostFirst(recs)
-	var best Window
-	found := false
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	var out []Window
 	for host, first := range hosts {
 		for start := tileStart(first); start.Before(lastEnd); start = start.Add(Tile) {
 			end := start.Add(Tile)
@@ -108,15 +106,16 @@ func (l *Loop) nextWindow(recs []bus.Record, now time.Time) (Window, bool) {
 			if _, done := l.diagnosed[id]; done {
 				continue
 			}
-			w := Window{ID: id, Host: host, Start: start, End: end}
-			if !found || w.Start.Before(best.Start) || (w.Start.Equal(best.Start) && w.Host < best.Host) {
-				best = w
-				found = true
-			}
-			break
+			out = append(out, Window{ID: id, Host: host, Start: start, End: end})
 		}
 	}
-	return best, found
+	sort.Slice(out, func(i, j int) bool {
+		if !out[i].Start.Equal(out[j].Start) {
+			return out[i].Start.Before(out[j].Start)
+		}
+		return out[i].Host < out[j].Host
+	})
+	return out
 }
 
 func filter(recs []bus.Record, w Window, domain string) []bus.Record {

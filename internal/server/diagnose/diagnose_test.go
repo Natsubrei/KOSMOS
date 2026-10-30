@@ -13,6 +13,7 @@ type fake struct {
 	calls        int
 	last         Window
 	nrec         int
+	totalRec     int
 	out          []Report
 }
 
@@ -22,6 +23,7 @@ func (f *fake) Analyze(w Window, records []bus.Record) []Report {
 	f.calls++
 	f.last = w
 	f.nrec = len(records)
+	f.totalRec += len(records)
 	if len(records) == 0 {
 		return nil
 	}
@@ -38,33 +40,15 @@ func TestTickCutsOldestClosedAndMarksEmpty(t *testing.T) {
 	l.now = func() time.Time { return time.Unix(40, 0).UTC() }
 
 	l.Tick()
-	if az.calls != 1 {
-		t.Fatalf("calls %d, want 1", az.calls)
-	}
-	if az.last.Host != "web-1" || az.last.Start.Unix() != 0 || az.last.End.Unix() != 10 {
-		t.Fatalf("window %+v", az.last)
-	}
-	if az.nrec != 1 {
-		t.Fatalf("records %d, want 1 in [0,10)", az.nrec)
-	}
-
-	l.Tick() // [10,20) empty
-	if az.calls != 2 || az.nrec != 0 || az.last.Start.Unix() != 10 {
-		t.Fatalf("empty tile: calls=%d nrec=%d start=%d", az.calls, az.nrec, az.last.Start.Unix())
-	}
-
-	l.Tick() // [20,30) has the second record
-	if az.nrec != 1 || az.last.Start.Unix() != 20 {
-		t.Fatalf("third tile %+v nrec=%d", az.last, az.nrec)
-	}
-
-	l.Tick() // [30,40) empty, last closed
-	if az.last.Start.Unix() != 30 {
-		t.Fatalf("fourth tile %+v", az.last)
-	}
-	l.Tick() // nothing left
 	if az.calls != 4 {
-		t.Fatalf("calls %d after drain, want 4", az.calls)
+		t.Fatalf("calls %d, want 4 windows in one Tick", az.calls)
+	}
+	if az.last.Host != "web-1" || az.last.Start.Unix() != 30 || az.last.End.Unix() != 40 {
+		t.Fatalf("last window %+v", az.last)
+	}
+	l.Tick()
+	if az.calls != 4 {
+		t.Fatalf("second Tick recut, calls %d", az.calls)
 	}
 }
 
@@ -89,7 +73,7 @@ func TestTickDoesNotRecut(t *testing.T) {
 	l.Tick()
 	st.Append(bus.Record{Host: "web-1", Domain: "cpu", At: time.Unix(6, 0).UTC()}) // late
 	l.Tick()
-	if az.calls != 2 { // [0,10) then [10,20)
+	if az.calls != 2 { // [0,10) and [10,20) in the first Tick
 		t.Fatalf("calls %d", az.calls)
 	}
 	if n := len(l.ListReports()); n != 1 {
@@ -106,8 +90,8 @@ func TestTickFiltersByDomainAndRunsEveryAnalyzer(t *testing.T) {
 	l := New(st, []Analyzer{cpuAz, ioAz})
 	l.now = func() time.Time { return time.Unix(20, 0).UTC() }
 	l.Tick()
-	if cpuAz.nrec != 1 || ioAz.nrec != 1 || cpuAz.calls != 1 || ioAz.calls != 1 {
-		t.Fatalf("cpu nrec=%d calls=%d io nrec=%d calls=%d", cpuAz.nrec, cpuAz.calls, ioAz.nrec, ioAz.calls)
+	if cpuAz.totalRec != 1 || ioAz.totalRec != 1 || cpuAz.calls != 2 || ioAz.calls != 2 {
+		t.Fatalf("cpu totalRec=%d calls=%d io totalRec=%d calls=%d", cpuAz.totalRec, cpuAz.calls, ioAz.totalRec, ioAz.calls)
 	}
 }
 
@@ -122,6 +106,24 @@ func TestListReportsCopy(t *testing.T) {
 	got[0].ID = "mutated"
 	if l.ListReports()[0].ID != "r1" {
 		t.Fatal("ListReports must return a copy")
+	}
+}
+
+func TestTickDrainsAllDueWindows(t *testing.T) {
+	st := store.NewMemory()
+	st.Append(bus.Record{Host: "a", Domain: "cpu", At: time.Unix(5, 0).UTC()})
+	st.Append(bus.Record{Host: "b", Domain: "cpu", At: time.Unix(5, 0).UTC()})
+	az := &fake{name: "cpu", domain: "cpu"}
+	l := New(st, []Analyzer{az})
+	l.now = func() time.Time { return time.Unix(3600, 0).UTC() }
+	l.Tick()
+	const want = 2 * 360 // two hosts, [0,3600) in 10s tiles
+	if az.calls != want {
+		t.Fatalf("calls %d, want %d", az.calls, want)
+	}
+	l.Tick()
+	if az.calls != want {
+		t.Fatalf("recut, calls %d", az.calls)
 	}
 }
 
