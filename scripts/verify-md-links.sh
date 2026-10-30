@@ -23,6 +23,10 @@ done < <(git ls-files)
 
 status=0
 for doc in $(git ls-files '*.md'); do
+  # Archived notes are frozen snapshots; outbound links are not current authority.
+  case "$doc" in
+    .agents/notes/archived/*) continue ;;
+  esac
   if ! content=$(git cat-file blob ":$doc" 2>/dev/null); then
     printf 'verify-md-links: %s is tracked but not in the index\n' "$doc"
     status=1

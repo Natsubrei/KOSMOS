@@ -8,5 +8,7 @@
 # Bilingual by construction: one table with both languages per row.
 docs/i18n/terminology.md
 
-# Subtree instructions for agents, English by policy (see AGENTS.md).
+# Subtree instructions for agents, English by policy (see the root AGENTS.md
+# Language section for what the corpus must pair).
 .agents/notes/implemented/AGENTS.md
+.agents/notes/archived/AGENTS.md

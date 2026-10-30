@@ -12,13 +12,14 @@
 
 ## 布局与状态
 
-`{proposed,implemented,rejected}/{architecture,feature,bug-fix,process,simplification,testing}/YYYY-MM-DD-slug.md`
+`{proposed,implemented,rejected,archived}/{architecture,feature,bug-fix,process,simplification,testing}/YYYY-MM-DD-slug.md`
 
-日期是该主题首次提出的时间。笔记在生命周期目录之间移动时不改文件名。
+日期是该主题首次提出的时间。笔记在生命周期目录之间移动时不改文件名。`archived/` 不再套一层 `implemented/`：只有已落地的笔记能进去，类目录已经够用。
 
 - **proposed（提议）**——已决定，尚未进树或只建了一部分。可以用将来时。`## Proposal` 是打算长成的样子；`## Acceptance criteria` 是什么可观察状态算完成；`## Risks` 是可能出错的地方以及这次明知放弃的东西。
-- **implemented（已落地）**——已发布的现实，用现在时。路径、符号、默认值随代码同一次变更更新。不写 spec 腔、迁移计划、验收清单。推翻该决定是新开一篇并交叉链接，不是改这篇。
-- **rejected（已否决）**——考虑过并否决，连同理由。
+- **implemented（已落地）**——已发布的现实，用现在时。路径、符号、默认值随代码同一次变更更新。不写 spec 腔、迁移计划、验收清单。*事实*（路径、名字、机制）必须就地改准。推翻*决定*或其理由是新开一篇并交叉链接，不是把这篇改成相反的决定。部分取代则两篇都留；完全取代可以把旧篇独有的理由并进拥有者，并在同一次变更里删掉旧三件套。
+- **rejected（已否决）**——考虑过并否决，连同理由。只在它还能挡住一个诱人的错误时保留；否则删掉三件套。
+- **archived（已归档）**——已落地、决定做完、不太可能再指导未来工作、但仍值得当历史留下的笔记。Status 仍是 `implemented`。归档那次变更在该行正下方插入 `Archived: YYYY-MM-DD`，搬走英文、中文、sidecar 三件套，修好指向它的链接，然后停下。封存后冻结：不改、不译、不当现行权威。见 [archived/AGENTS.md](archived/AGENTS.md)。
 
 | 类 | 覆盖 |
 |---|---|

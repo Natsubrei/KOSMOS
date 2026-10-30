@@ -8,7 +8,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 root=.agents/notes
-lifecycles='proposed implemented rejected'
+lifecycles='proposed implemented rejected archived'
 classes='architecture bug-fix feature process simplification testing'
 # Non-note Markdown allowed to sit directly at a lifecycle root.
 allowlist='AGENTS.md'
@@ -51,11 +51,23 @@ banned_implemented() {
   return 1
 }
 
-check_format() {
-  local rel=$1 lifecycle=$2
-  local file="$root/$rel"
+# header_lifecycle <lifecycle>: the status a note in that folder carries.
+# archived/ keeps Status: implemented; the Archived: line is what marks it sealed.
+header_lifecycle() {
+  case "$1" in
+    archived) echo implemented ;;
+    *) echo "$1" ;;
+  esac
+}
+
+# check_header <rel> <lifecycle> <file>: shared by both language sides, which
+# carry the same machine-checked tokens.
+check_header() {
+  local rel=$1 lifecycle=$2 file=$3
   local -a lines=()
   mapfile -t lines < "$file"
+  local want
+  want=$(header_lifecycle "$lifecycle")
 
   case "${lines[0]:-}" in
     '# Agent Note: '*) ;;
@@ -63,16 +75,33 @@ check_format() {
   esac
   [[ ${lines[0]:-} == '# Agent Note: ' ]] && err "format: $rel — line 1 has an empty title"
   [[ ${lines[1]:-} != '' ]] && err "format: $rel — line 2 must be blank"
-
   case "${lines[2]:-}" in
-    "Status: $lifecycle") ;;
-    *) err "format: $rel — line 3 must be 'Status: $lifecycle'" ;;
+    "Status: $want") ;;
+    *) err "format: $rel — line 3 must be 'Status: $want'" ;;
   esac
+
   if [[ $lifecycle == rejected ]]; then
     [[ ${lines[2]:-} == 'Status: rejected — '* ]] ||
       err "format: $rel — a rejected note's status carries its reason: 'Status: rejected — <why>'"
   fi
-  [[ ${lines[3]:-} != '' ]] && err "format: $rel — line 4 must be blank"
+  if [[ $lifecycle == archived ]]; then
+    [[ ${lines[3]:-} =~ ^Archived:\ [0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] ||
+      err "format: $rel — line 4 must be 'Archived: YYYY-MM-DD'"
+    [[ ${lines[4]:-} != '' ]] && err "format: $rel — line 5 must be blank"
+  else
+    [[ ${lines[3]:-} != '' ]] && err "format: $rel — line 4 must be blank"
+  fi
+
+  # A trailing `[[ ]] && err` leaves a nonzero status when the check passes;
+  # that would read as a failed header under set -e.
+  return 0
+}
+
+check_format() {
+  local rel=$1 lifecycle=$2
+  local file="$root/$rel"
+
+  check_header "$rel" "$lifecycle" "$file"
 
   local status_count
   status_count=$(awk '
@@ -92,7 +121,7 @@ check_format() {
   local required=''
   case "$lifecycle" in
     proposed) required='## Proposal|## Acceptance criteria|## Risks' ;;
-    implemented) required='## Decision|## Consequences' ;;
+    implemented|archived) required='## Decision|## Consequences' ;;
     rejected) required='## Proposal' ;;
   esac
   local heading
@@ -102,7 +131,7 @@ check_format() {
       err "format: $rel — a $lifecycle note requires the '$heading' section"
   done < <(tr '|' '\n' <<< "$required")
 
-  if [[ $lifecycle == implemented ]]; then
+  if [[ $lifecycle == implemented || $lifecycle == archived ]]; then
     while IFS= read -r heading; do
       [[ -z $heading ]] && continue
       if banned_implemented "$heading"; then
@@ -158,15 +187,7 @@ while IFS= read -r file; do
   # other part of that file belongs to the pairing gate.
   zh_file="$root/${rel%.md}.zh.md"
   if [[ -f $zh_file ]]; then
-    mapfile -t zh_lines < "$zh_file"
-    case "${zh_lines[0]:-}" in
-      '# Agent Note: '*) ;;
-      *) err "format: ${rel%.md}.zh.md — line 1 must be '# Agent Note: <title>'" ;;
-    esac
-    case "${zh_lines[2]:-}" in
-      "Status: $lifecycle") ;;
-      *) err "format: ${rel%.md}.zh.md — line 3 must be 'Status: $lifecycle'" ;;
-    esac
+    check_header "${rel%.md}.zh.md" "$lifecycle" "$zh_file"
   fi
 done < <(find "$root" -name '*.md' | sort)
 

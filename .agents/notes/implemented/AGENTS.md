@@ -1,8 +1,10 @@
 # AGENTS.md — Implemented Agent Notes
 
-These notes describe shipped decisions. Keep paths, symbols, defaults, and
-mechanisms current in the same change that alters them. Rewrite stale facts
-in place; do not append change history.
+These notes describe shipped decisions. [The Agent Note rules](../README.md)
+own the lifecycle, the file format, and the boundary between updating facts and
+reversing a decision.
 
-Updating factual realization is required. Reversing the decision or its
-rationale requires a new Agent Note and a cross-link.
+Keep paths, symbols, defaults, and mechanisms current in the same change that
+alters them. A shipped note that no longer guides future work but is still
+worth keeping as history moves to `archived/` per
+[archived/AGENTS.md](../archived/AGENTS.md).
