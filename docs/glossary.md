@@ -27,9 +27,10 @@ for its domain. That is the only interface the runtime kit knows.
 _Avoid_: driver, provider
 
 **Analyzer**:
-The server-side counterpart of a domain bundle: subscribes to that domain's Records on
-the server bus and produces Reports.
-_Avoid_: rule engine, processor, finding
+The server-side counterpart of a domain bundle: the diagnosis loop calls it with
+one Window of that domain's Records, and it produces Reports. It does not
+subscribe to the record bus.
+_Avoid_: rule engine, processor, finding, subscriber
 
 **Record bus**:
 The in-process typed-record pipeline. Each side has one (agent, server); both carry

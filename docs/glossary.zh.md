@@ -23,8 +23,8 @@ _避免使用_：plugin（我们编译期编入，没有运行时加载）
 _避免使用_：driver、provider
 
 **Analyzer**：
-域包在 server 侧的对应实现：在 server 总线上订阅该域的 Record，产出 Report。
-_避免使用_：rule engine、processor、finding
+域包在 server 侧的对应实现：诊断循环把该域一个 Window 的 Record 交给它，由它产出 Report。它不订阅记录总线（Record bus）。
+_避免使用_：rule engine、processor、finding、subscriber
 
 **Record bus**：
 进程内的类型化 Record 管线。agent 与 server 各有一条，都保持零域分支——新的 Record 种类靠注册进入，从不靠在总线上加域分支。
